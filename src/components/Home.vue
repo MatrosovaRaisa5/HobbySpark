@@ -1,34 +1,37 @@
 <script lang="ts" setup>
-function continueWith(provider: string) {
-  console.log(`Продолжить с ${provider}`);
+import { $navigateTo } from 'nativescript-vue'
+import LoginPage from './LoginPage.vue'
+import RegisterPage from './RegisterPage.vue'
+
+function goToLogin() {
+  $navigateTo(LoginPage)
 }
 
-function continueAsGuest() {
-  console.log('Продолжить как гость');
+function goToRegister() {
+  $navigateTo(RegisterPage)
 }
 </script>
 
 <template>
   <Page actionBarHidden="true">
     <GridLayout
-      rows="auto, auto, auto, auto, auto, auto, auto"
+      rows="auto, auto, auto, auto, auto, auto"
       class="px-6"
       :style="{ background: 'linear-gradient(155.78deg, #8E5EEDF0 0%, #FA9938F0 100%)' }"
     >
-
       <StackLayout row="0" class="items-center mt-[70px]">
         <Image src="res://icon" width="72" height="72" class="rounded-2xl" />
       </StackLayout>
 
-      <StackLayout row="1" class="items-center mt-[12px]">
+      <StackLayout row="1" class="items-center mt-2">
         <Label
           text="HobbySpark"
-          class="text-white font-extrabold text-4xl text-shadow-1"
+          class="text-white font-extrabold text-4xl text-center text-shadow-1"
           style="font-family: 'Nunito'"
         />
       </StackLayout>
 
-      <StackLayout row="2" class="items-center mt-2">
+      <StackLayout row="2" class="items-center mt-5">
         <Label
           text="Искры вдохновения каждый день"
           class="text-white font-extrabold text-2xl text-center text-shadow-2"
@@ -46,7 +49,7 @@ function continueAsGuest() {
         />
       </StackLayout>
 
-      <StackLayout row="4" class="px-8 mt-4">
+      <StackLayout row="4" class="px-5 mt-8">
         <Label
           text="Попробуй что-то новое без обязательств и стресса"
           class="text-white text-lg text-center text-shadow-3"
@@ -55,48 +58,25 @@ function continueAsGuest() {
         />
       </StackLayout>
 
-      <StackLayout row="5" class="mt-10 px-8 space-y-3">
+      <StackLayout row="5" class="mt-16 px-3">
         <Button
-          @tap="continueWith('Telegram')"
-          class="bg-white text-[#323743] rounded-xl h-12 text-base"
+          @tap="goToLogin"
+          class="bg-white text-[#323743] rounded-xl h-17 text-base mb-6"
           style="font-family: 'Nunito Sans'"
         >
           <FormattedString>
-            <Span text="📱 " />
-            <Span text="Продолжить с Telegram" />
+            <Span text="Войти"/>
           </FormattedString>
         </Button>
 
         <Button
-          @tap="continueWith('Google')"
-          class="bg-white text-[#323743] rounded-xl h-12 text-base"
+          @tap="goToRegister"
+          class="bg-white text-[#323743] rounded-xl h-17 text-base mb-6"
           style="font-family: 'Nunito Sans'"
         >
           <FormattedString>
-            <Span text="🔍 " />
-            <Span text="Продолжить с Google" />
+            <Span text="Регистрация"/>
           </FormattedString>
-        </Button>
-
-        <Button
-          @tap="continueWith('Apple')"
-          class="bg-white text-[#323743] rounded-xl h-12 text-base"
-          style="font-family: 'Nunito Sans'"
-        >
-          <FormattedString>
-            <Span text="🍎 " />
-            <Span text="Продолжить с Apple" />
-          </FormattedString>
-        </Button>
-      </StackLayout>
-
-      <StackLayout row="6" class="mt-6 items-center">
-        <Button
-          @tap="continueAsGuest"
-          class="bg-transparent text-[#565D6D] text-lg"
-          style="font-family: 'Nunito Sans'"
-        >
-          Продолжить как гость
         </Button>
       </StackLayout>
     </GridLayout>
