@@ -13,69 +13,53 @@ function goToRegister() {
 </script>
 
 <template>
-  <Page actionBarHidden="true">
+  <Page actionBarHidden="true" class="page-gradient">
     <GridLayout
       rows="auto, auto, auto, auto, auto, auto"
       class="px-6"
-      :style="{ background: 'linear-gradient(155.78deg, #8E5EEDF0 0%, #FA9938F0 100%)' }"
     >
       <StackLayout row="0" class="items-center mt-[70px]">
         <Image src="res://icon" width="72" height="72" class="rounded-2xl" />
       </StackLayout>
 
       <StackLayout row="1" class="items-center mt-2">
-        <Label
-          text="HobbySpark"
-          class="text-white font-extrabold text-4xl text-center text-shadow-1"
-          style="font-family: 'Nunito'"
-        />
+        <Label text="HobbySpark" class="main-title" textWrap="true" />
       </StackLayout>
 
       <StackLayout row="2" class="items-center mt-5">
         <Label
           text="Искры вдохновения каждый день"
-          class="text-white font-extrabold text-2xl text-center text-shadow-2"
-          style="font-family: 'Nunito'"
+          class="sub-title"
           textWrap="true"
         />
       </StackLayout>
 
-      <StackLayout row="3" class="px-8 mt-8">
+      <StackLayout row="3" class="px-10 mt-8">
         <Label
           text="Увлекательные челленджи, которые поддержат твой путь!"
-          class="text-[#5618D4] font-bold text-lg text-center"
-          style="font-family: 'Nunito Sans'"
+          class="description"
           textWrap="true"
         />
       </StackLayout>
 
-      <StackLayout row="4" class="px-5 mt-8">
+      <StackLayout row="4" class="px-4 mt-8">
         <Label
           text="Попробуй что-то новое без обязательств и стресса"
-          class="text-white text-lg text-center text-shadow-3"
-          style="font-family: 'Nunito Sans'"
+          class="tagline"
           textWrap="true"
         />
       </StackLayout>
 
-      <StackLayout row="5" class="mt-16 px-3">
-        <Button
-          @tap="goToLogin"
-          class="bg-white text-[#323743] rounded-xl h-17 text-base mb-6"
-          style="font-family: 'Nunito Sans'"
-        >
+      <StackLayout row="5" class="mt-10 px-3">
+        <Button @tap="goToLogin" class="action-button">
           <FormattedString>
-            <Span text="Войти"/>
+            <Span text="Войти" />
           </FormattedString>
         </Button>
 
-        <Button
-          @tap="goToRegister"
-          class="bg-white text-[#323743] rounded-xl h-17 text-base mb-6"
-          style="font-family: 'Nunito Sans'"
-        >
+        <Button @tap="goToRegister" class="action-button">
           <FormattedString>
-            <Span text="Регистрация"/>
+            <Span text="Регистрация" />
           </FormattedString>
         </Button>
       </StackLayout>
@@ -84,13 +68,59 @@ function goToRegister() {
 </template>
 
 <style scoped>
-.text-shadow-1 {
+.page-gradient {
+  background: linear-gradient(155.78deg, #8e5eedf0 0%, #fa9938f0 100%);
+}
+
+.main-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 36px;
+  font-weight: 800;
+  color: white;
   text-shadow: 0px 2px 4px rgba(24, 24, 32, 0.15);
+  text-align: center;
 }
-.text-shadow-2 {
+
+.sub-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: white;
   text-shadow: 0px 0px 6px rgba(255, 255, 255, 0.5);
+  text-align: center;
 }
-.text-shadow-3 {
+
+.description {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: #5618d4;
+  text-align: center;
+}
+
+.tagline {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 19px;
+  color: white;
   text-shadow: 1px 1px 3.6px rgba(23, 26, 31, 0.25);
+  text-align: center;
+}
+
+.action-button {
+  background-color: white;
+  color: #323743;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  border-radius: 50px;
+  height: 190px;
+  width: 85%;
+  margin-bottom: 70px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.156);
+  padding: 0px;
+}
+
+.action-button:active {
+  background-color: #f0f0f0;
 }
 </style>
