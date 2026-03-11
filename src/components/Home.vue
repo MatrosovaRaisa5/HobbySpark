@@ -14,56 +14,55 @@ function goToRegister() {
 
 <template>
   <Page actionBarHidden="true" class="page-gradient">
-    <GridLayout
-      rows="auto, auto, auto, auto, auto, auto"
-      class="px-6"
-    >
-      <StackLayout row="0" class="items-center mt-[70px]">
-        <Image src="res://icon" width="72" height="72" class="rounded-2xl" />
-      </StackLayout>
+    <ScrollView>
+      <GridLayout rows="auto, auto, auto, auto, auto, auto" class="px-6">
+        <StackLayout row="0" class="items-center mt-[50px]">
+          <Image src="res://icon" width="72" height="72" class="rounded-2xl" />
+        </StackLayout>
 
-      <StackLayout row="1" class="items-center mt-2">
-        <Label text="HobbySpark" class="main-title" textWrap="true" />
-      </StackLayout>
+        <StackLayout row="1" class="items-center mt-2">
+          <Label text="HobbySpark" class="main-title" textWrap="true" />
+        </StackLayout>
 
-      <StackLayout row="2" class="items-center mt-5">
-        <Label
-          text="Искры вдохновения каждый день"
-          class="sub-title"
-          textWrap="true"
-        />
-      </StackLayout>
+        <StackLayout row="2" class="items-center mt-3">
+          <Label
+            text="Искры вдохновения каждый день"
+            class="sub-title"
+            textWrap="true"
+          />
+        </StackLayout>
 
-      <StackLayout row="3" class="px-10 mt-8">
-        <Label
-          text="Увлекательные челленджи, которые поддержат твой путь!"
-          class="description"
-          textWrap="true"
-        />
-      </StackLayout>
+        <StackLayout row="3" class="px-10 mt-8">
+          <Label
+            text="Увлекательные челленджи, которые поддержат твой путь!"
+            class="description"
+            textWrap="true"
+          />
+        </StackLayout>
 
-      <StackLayout row="4" class="px-4 mt-8">
-        <Label
-          text="Попробуй что-то новое без обязательств и стресса"
-          class="tagline"
-          textWrap="true"
-        />
-      </StackLayout>
+        <StackLayout row="4" class="px-4 mt-6">
+          <Label
+            text="Попробуй что-то новое без обязательств и стресса"
+            class="tagline"
+            textWrap="true"
+          />
+        </StackLayout>
 
-      <StackLayout row="5" class="mt-10 px-3">
-        <Button @tap="goToLogin" class="action-button">
-          <FormattedString>
-            <Span text="Войти" />
-          </FormattedString>
-        </Button>
+        <StackLayout row="5" class="mt-10 px-3">
+          <Button @tap="goToLogin" class="action-button">
+            <FormattedString>
+              <Span text="Войти" />
+            </FormattedString>
+          </Button>
 
-        <Button @tap="goToRegister" class="action-button">
-          <FormattedString>
-            <Span text="Регистрация" />
-          </FormattedString>
-        </Button>
-      </StackLayout>
-    </GridLayout>
+          <Button @tap="goToRegister" class="action-button">
+            <FormattedString>
+              <Span text="Регистрация" />
+            </FormattedString>
+          </Button>
+        </StackLayout>
+      </GridLayout>
+    </ScrollView>
   </Page>
 </template>
 
@@ -113,11 +112,11 @@ function goToRegister() {
   font-size: 20px;
   font-weight: 400;
   border-radius: 50px;
-  height: 190px;
-  width: 85%;
-  margin-bottom: 70px;
+  min-height: 80px;
+  width: 100%;
+  margin-bottom: 30px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.156);
-  padding: 0px;
+  padding: 0;
 }
 
 .action-button:active {

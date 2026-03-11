@@ -21,10 +21,10 @@
 
       <ScrollView row="1" class="form-scroll">
         <StackLayout class="form-container">
+          <!-- Имя -->
           <StackLayout class="textbox">
             <TextField hint="Имя" class="input" />
           </StackLayout>
-
           <StackLayout class="textbox">
             <TextField hint="Фамилия" class="input" />
           </StackLayout>
@@ -73,7 +73,8 @@
 
 <script lang="ts" setup>
 import { ref } from 'nativescript-vue'
-import { $navigateBack } from 'nativescript-vue'
+import { $navigateBack, $navigateTo } from 'nativescript-vue'
+import InterestsSelection from './InterestsSelection.vue'
 
 const codeRequested = ref(false)
 
@@ -83,7 +84,9 @@ function requestCode() {
 
 function register() {
   console.log('Регистрация завершена')
-  // Здесь добавить логику создания аккаунта
+  // Добавить логику для создания аккаунта
+  // Переход на экран выбора интересов
+  $navigateTo(InterestsSelection)
 }
 
 function goBack() {
@@ -98,8 +101,10 @@ function goBack() {
 
 .white-header {
   background-color: white;
-  padding: 40px;
-  margin-bottom: 70px;
+  padding: 30px 20px 20px 20px;
+  margin-bottom: 30px;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
 }
 
 .header-content {
@@ -111,14 +116,14 @@ function goBack() {
   font-weight: bold;
   font-family: 'Nunito', sans-serif;
   text-align: center;
-  padding-right: 75px;
+  padding-right: 40px;
 }
 
 .header-subtitle {
   font-size: 16px;
   color: #242424;
   text-align: center;
-  margin-top: 15px;
+  margin-top: 8px;
   font-family: 'Nunito Sans', sans-serif;
 }
 
@@ -127,48 +132,45 @@ function goBack() {
 }
 
 .form-container {
-  padding: 27px;
+  padding: 20px;
 }
 
 .textbox {
-  margin-bottom: 80px;
+  margin-bottom: 30px;
 }
 
-
 .input {
-  width: 95%;
-  height: 150px;
-  padding-left: 12px;
-  padding-right: 12px;
+  width: 100%;
+  min-height: 80px;
+  padding: 15px;
   font-size: 16px;
   font-family: 'Nunito Sans', sans-serif;
   background-color: white;
-  border-width: 9px;
+  border-width: 6px;
   border-color: #8b60e0;
   border-radius: 50px;
 }
-
 
 .info-text {
   font-size: 15px;
   color: #333333;
   text-align: center;
-  padding-left: 15px;
-  padding-right: 15px;
-  margin-bottom: 70px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-bottom: 30px;
   font-family: 'Nunito Sans', sans-serif;
 }
 
 .button {
-  width: 70%;
-  height: 150px;
+  width: 100%;
+  min-height: 80px;
   background-color: #854ef3;
   color: white;
-  font-size: 16px;
+  font-size: 18px;
   font-family: 'Nunito Sans', sans-serif;
   border-radius: 50px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
-  margin-bottom: 80px;
+  margin-bottom: 30px;
   padding: 0;
 }
 
@@ -176,12 +178,9 @@ function goBack() {
   background-color: #5116C8;
 }
 
-
 .phone-container {
-  width: 90%;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 80px;
+  width: 100%;
+  margin-bottom: 30px;
   align-items: stretch;
 }
 
@@ -190,14 +189,14 @@ function goBack() {
   font-family: 'Nunito Sans', sans-serif;
   color: #363645;
   background-color: white;
-  border-width: 9px;
-  border-color: #8E5EED;
+  border-width: 6px;
+  border-color: #8b60e0;
   border-right-width: 0;
   border-top-left-radius: 50px;
   border-bottom-left-radius: 50px;
   padding: 0 12px;
   text-align: center;
-  line-height: 150px;
+  min-height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
