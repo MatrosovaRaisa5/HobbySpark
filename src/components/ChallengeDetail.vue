@@ -1,0 +1,304 @@
+<template>
+    <Page actionBarHidden="true" class="page">
+      <GridLayout rows="auto, *">
+        <!-- Шапка с кнопкой назад и заголовком -->
+        <StackLayout row="0" class="header-section">
+          <GridLayout columns="auto, *" class="header-content">
+            <Image
+              col="0"
+              src="res://back"
+              width="32"
+              height="32"
+              class="back-button"
+              @tap="goBack"
+            />
+            <Label col="1" text="Детали искры" class="header-title" />
+          </GridLayout>
+        </StackLayout>
+
+        <!-- Основной контент с прокруткой -->
+        <ScrollView row="1" class="content-scroll">
+          <StackLayout class="content-container">
+            <!-- Картинка с затемнением и названием (исправлено: вместо псевдоэлемента используем отдельный View) -->
+            <GridLayout class="image-container" rows="*" columns="*">
+              <Image
+                row="0"
+                col="0"
+                :src="challenge.image"
+                class="challenge-image"
+                stretch="aspectFill"
+              />
+              <!-- Полупрозрачный градиент (заменили псевдоэлемент) -->
+              <StackLayout row="0" col="0" class="image-overlay" />
+              <Label
+                row="0"
+                col="0"
+                :text="challenge.title"
+                class="image-title"
+                textWrap="true"
+              />
+            </GridLayout>
+
+            <!-- Описание челленджа -->
+            <Label :text="challenge.description" class="challenge-description" textWrap="true" />
+
+            <!-- Кнопка "Начать вызов" -->
+            <Button text="Начать вызов" class="start-button" @tap="startChallenge" />
+
+            <!-- Еженедельная программа -->
+            <Label text="Еженедельная программа" class="section-title" />
+
+            <!-- Карточки дней (аккордеон) -->
+            <StackLayout v-for="(day, index) in challenge.weeklyProgram" :key="index" class="day-card">
+              <GridLayout columns="*, auto" class="day-header" @tap="toggleDay(index)">
+                <Label col="0" :text="day.title" class="day-title" textWrap="true" />
+                <Image
+                  col="1"
+                  src="res://down"
+                  width="16"
+                  height="16"
+                  class="day-arrow"
+                  :class="{ rotated: openDayIndex === index }"
+                />
+              </GridLayout>
+              <Label
+                v-if="openDayIndex === index"
+                :text="day.description"
+                class="day-description"
+                textWrap="true"
+              />
+            </StackLayout>
+
+            <!-- Необходимые материалы -->
+            <Label text="Необходимые материалы" class="section-title" />
+
+            <StackLayout v-for="(material, idx) in challenge.materials" :key="idx" class="material-item">
+              <GridLayout columns="auto, *">
+                <Label col="0" text="✔" class="check-icon" />
+                <Label col="1" :text="material" class="material-text" textWrap="true" />
+              </GridLayout>
+            </StackLayout>
+
+            <!-- Пригласить друзей (увеличен отступ до кнопки) -->
+            <Label text="Позовите друзей в вызов!" class="invite-title" />
+            <Button text="Пригласить друзей" class="invite-button" @tap="inviteFriends" />
+          </StackLayout>
+        </ScrollView>
+      </GridLayout>
+    </Page>
+  </template>
+
+  <script lang="ts" setup>
+  import { ref, computed } from 'nativescript-vue'
+  import { $navigateBack, $navigateTo } from 'nativescript-vue'
+  import { challengesData } from '~/data/challengesData'
+
+  const props = defineProps<{ challengeId: number }>()
+
+  const challenge = computed(() => {
+    return challengesData.find(c => c.id === props.challengeId) || challengesData[0]
+  })
+
+  const openDayIndex = ref<number | null>(null)
+
+  function toggleDay(index: number) {
+    openDayIndex.value = openDayIndex.value === index ? null : index
+  }
+
+  function goBack() {
+    $navigateBack()
+  }
+
+  function startChallenge() {
+    console.log('Начать вызов', challenge.value.title)
+  }
+
+  function inviteFriends() {
+    console.log('Пригласить друзей')
+  }
+  </script>
+
+  <style scoped>
+  .page {
+    background-color: white;
+  }
+
+  .header-section {
+    background-color: white;
+    padding: 20px 20px 10px 20px;
+    border-bottom-width: 1px;
+    border-bottom-color: #F0F0F0;
+  }
+
+  .header-content {
+    align-items: center;
+  }
+
+  .back-button {
+    margin-right: 17px;
+  }
+
+  .header-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #181820;
+    margin-top: 20px;
+    margin-bottom: 40px; /* исправлено: удалён дубль */
+  }
+
+  .content-scroll {
+    background-color: #e3d6fe;
+  }
+
+  .content-container {
+  }
+
+  .image-container {
+    position: relative;
+    width: 100%;
+    height: 450px;
+    margin-bottom: 7px;
+  }
+
+  .challenge-image {
+    width: 100%;
+    height: 450px;
+  }
+
+  .image-overlay {
+    background: linear-gradient(0deg, rgba(0,0,0,0.83) 0%, rgba(0,0,0,0) 100%);
+    width: 100%;
+    height: 100%;
+  }
+
+  .image-title {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0px 2px 4px rgba(24,24,32,0.15);
+    text-align: center;
+    margin-top: 250px;
+    z-index: 2;
+  }
+
+  .challenge-description {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 15px;
+    line-height: 14px;
+    color: #363645;
+    margin-bottom: 20px;
+    padding: 50px;
+  }
+
+  .start-button {
+    width: 80%;
+    height: 140px;
+    background-color: #854ef3;
+    color: white;
+    font-size: 18px;
+    font-family: 'Nunito Sans', sans-serif;
+    border-radius: 50px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+    padding: 0;
+  }
+
+  .section-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #181820;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    padding-top: 30px;
+    text-align: center;
+  }
+
+  .day-card {
+    background-color: white;
+    border-width: 1px;
+    border-color: #F3F3F6;
+    border-radius: 30px;
+    margin: 20px;
+    margin-left: 50px;
+    margin-right: 50px;
+    padding: 40px;
+    box-shadow: 0px 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .day-header {
+    align-items: center;
+  }
+
+  .day-title {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #181820;
+    margin-bottom: 10px;
+  }
+
+  .day-arrow {
+    transition: transform 0.2s;
+  }
+
+  .day-arrow.rotated {
+    transform: rotate(180deg);
+  }
+
+  .day-description {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 14px;
+    line-height: 16px;
+    color: #363645;
+    margin-top: 10px;
+  }
+
+  .material-item {
+    margin-bottom: 10px;
+  }
+
+  .check-icon {
+    font-size: 24px;
+    color: #8E5EED;
+    margin-right: 12px;
+    width: 24px;
+    text-align: center;
+    vertical-align: center;
+  }
+
+  .material-text {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 15px;
+    color: #363645;
+    padding: 20px;
+  }
+
+  .invite-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #181820;
+    text-align: center;
+    margin: 40px 0 40px 0;
+  }
+
+  .invite-button {
+    width: 75%;
+    background-color: #F59741;
+    color: #ffffff;
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius:50px;
+    height: 140px;
+    margin-bottom: 60px;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.05);
+  }
+  </style>

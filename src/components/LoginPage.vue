@@ -85,13 +85,13 @@ function goBack() {
 
 <style scoped>
 .page-gradient {
-  background: linear-gradient(155.78deg, #8e5eedba 0%, #fa9938c6 100%);
+  background: linear-gradient(155.78deg, #8e5eed8d 0%, #fa9938a2 100%);
 }
 
 .white-header {
   background-color: white;
   padding: 30px 20px 20px 20px;
-  margin-bottom: 30px;
+  margin-bottom: 60px;
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
 }
@@ -121,7 +121,7 @@ function goBack() {
 }
 
 .form-container {
-  padding: 20px;
+  padding: 40px;
 }
 
 .textbox {
@@ -129,9 +129,9 @@ function goBack() {
 }
 
 .input {
-  width: 100%;
-  min-height: 80px;
-  padding: 12px;
+  width: 90%;
+  height: 140px;
+  padding: 20px;
   font-size: 16px;
   font-family: 'Nunito Sans', sans-serif;
   background-color: white;
@@ -151,15 +151,15 @@ function goBack() {
 }
 
 .button {
-  width: 100%;
-  min-height: 80px;
+  width: 65%;
+  height: 140px;
   background-color: #854ef3;
   color: white;
   font-size: 18px;
   font-family: 'Nunito Sans', sans-serif;
   border-radius: 50px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
-  margin-bottom: 30px;
+  margin-bottom: 80px;
   padding: 0;
 }
 
@@ -168,7 +168,7 @@ function goBack() {
 }
 
 .phone-container {
-  width: 100%;
+  width: 90%;
   margin-bottom: 30px;
   align-items: stretch;
 }
@@ -183,7 +183,7 @@ function goBack() {
   border-right-width: 0;
   border-top-left-radius: 50px;
   border-bottom-left-radius: 50px;
-  padding: 0 12px;
+  padding: 0 20px;
   text-align: center;
   min-height: 80px;
   display: flex;

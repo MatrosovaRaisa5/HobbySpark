@@ -17,14 +17,14 @@ function goToRegister() {
     <ScrollView>
       <GridLayout rows="auto, auto, auto, auto, auto, auto" class="px-6">
         <StackLayout row="0" class="items-center mt-[50px]">
-          <Image src="res://icon" width="72" height="72" class="rounded-2xl" />
+          <Image src="res://icon" width="72" height="72" class="image" />
         </StackLayout>
 
-        <StackLayout row="1" class="items-center mt-2">
+        <StackLayout row="1" class="items-center mt-3">
           <Label text="HobbySpark" class="main-title" textWrap="true" />
         </StackLayout>
 
-        <StackLayout row="2" class="items-center mt-3">
+        <StackLayout row="2" class="items-center mt-6">
           <Label
             text="Искры вдохновения каждый день"
             class="sub-title"
@@ -32,7 +32,7 @@ function goToRegister() {
           />
         </StackLayout>
 
-        <StackLayout row="3" class="px-10 mt-8">
+        <StackLayout row="3" class="px-10 mt-10">
           <Label
             text="Увлекательные челленджи, которые поддержат твой путь!"
             class="description"
@@ -40,7 +40,7 @@ function goToRegister() {
           />
         </StackLayout>
 
-        <StackLayout row="4" class="px-4 mt-6">
+        <StackLayout row="4" class="px-4 mt-">
           <Label
             text="Попробуй что-то новое без обязательств и стресса"
             class="tagline"
@@ -71,6 +71,11 @@ function goToRegister() {
   background: linear-gradient(155.78deg, #8e5eedf0 0%, #fa9938f0 100%);
 }
 
+.image {
+  align-self: center;
+  margin-top: 50px;
+}
+
 .main-title {
   font-family: 'Nunito', sans-serif;
   font-size: 36px;
@@ -78,6 +83,7 @@ function goToRegister() {
   color: white;
   text-shadow: 0px 2px 4px rgba(24, 24, 32, 0.15);
   text-align: center;
+  margin-bottom: 70px;
 }
 
 .sub-title {
@@ -87,6 +93,7 @@ function goToRegister() {
   color: white;
   text-shadow: 0px 0px 6px rgba(255, 255, 255, 0.5);
   text-align: center;
+  margin-bottom: 100px;
 }
 
 .description {
@@ -95,6 +102,9 @@ function goToRegister() {
   font-weight: 700;
   color: #5618d4;
   text-align: center;
+  margin-bottom: 90px;
+  padding-left: 40px;
+  padding-right: 40px;
 }
 
 .tagline {
@@ -103,6 +113,7 @@ function goToRegister() {
   color: white;
   text-shadow: 1px 1px 3.6px rgba(23, 26, 31, 0.25);
   text-align: center;
+  margin-bottom: 160px;
 }
 
 .action-button {
@@ -111,10 +122,10 @@ function goToRegister() {
   font-family: 'Nunito Sans', sans-serif;
   font-size: 20px;
   font-weight: 400;
-  border-radius: 50px;
-  min-height: 80px;
-  width: 100%;
-  margin-bottom: 30px;
+  border-radius: 70px;
+  height: 160px;
+  width: 80%;
+  margin-bottom: 70px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.156);
   padding: 0;
 }

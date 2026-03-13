@@ -6,8 +6,8 @@
             <Image
               col="0"
               src="res://icon"
-              width="45"
-              height="45"
+              width="60"
+              height="60"
               class="app-icon"
             />
             <Label col="1" text="Выбор интересов" class="header-title" />
@@ -67,7 +67,7 @@
                   <Label text="💻" class="card-icon" />
                 </StackLayout>
                 <Label text="Технологии" class="card-title" />
-                <Label text="Программирова- ние, роботы, 3D-модели" class="card-description" textWrap="true" />
+                <Label text="Программирование, роботы, 3D-модели" class="card-description" textWrap="true" />
               </StackLayout>
 
               <!-- Карточка 4: Языки -->
@@ -130,7 +130,8 @@
   <script lang="ts" setup>
   import { ref } from 'nativescript-vue'
   import { Dialogs } from '@nativescript/core'
-  // import { $navigateTo } from 'nativescript-vue' // для перехода на следующую страницу
+  import CatalogPage from './CatalogPage.vue'
+  import { $navigateTo } from 'nativescript-vue'
 
   const selected = ref<number[]>([])
 
@@ -144,18 +145,22 @@
 
   async function goNext() {
     if (selected.value.length < 2) {
-      await Dialogs.alert('Пожалуйста, выберите минимум два направления')
+      await Dialogs.alert({
+      title: "Недостаточно интересов",
+      message: "Пожалуйста, выберите минимум два направления",
+      okButtonText: "Ок"
+    });
       return
     }
     // Переход на следующую страницу
-    // $navigateTo(NextPage)
-    console.log('Выбрано:', selected.value)
+    $navigateTo(CatalogPage)
   }
   </script>
 
   <style scoped>
   .page {
     background-color: white;
+    padding: 20px;
   }
 
   .header-section {
@@ -177,17 +182,19 @@
     font-size: 24px;
     font-weight: 700;
     color: #181820;
-    padding-bottom: 4px;
+    padding-bottom: 12px;
   }
 
   .subtitle {
     font-family: 'Nunito Sans', sans-serif;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 400;
     color: #171A1F;
     line-height: 10px;
     margin-top: 5px;
     margin-bottom: 5px;
+    margin-bottom: 40px;
+    text-align: center;
   }
 
   .cards-scroll {
@@ -199,19 +206,19 @@
   }
 
   .cards-grid {
-    margin-bottom: 20px;
+    margin-bottom: 40px;
   }
 
   .card {
     background-color: white;
     border-width: 2px;
     border-color: #F3F3F6;
-    border-radius: 14px;
-    padding: 16px 8px;
-    margin: 6px;
+    border-radius: 30px;
+    padding: 20px 18px;
+    margin: 20px;
     align-items: center;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.08);
-    min-height: 170px;
+    height: 450px;
   }
 
   .card-selected {
@@ -244,18 +251,17 @@
   }
 
   .button {
-    width: 100%;
-    min-height: 60px;
-    background-color: #854ef3;
-    color: white;
-    font-size: 18px;
-    font-family: 'Nunito Sans', sans-serif;
-    border-radius: 30px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
-    margin-top: 10px;
-    margin-bottom: 20px;
-    padding: 0;
-  }
+  width: 65%;
+  height: 140px;
+  background-color: #854ef3;
+  color: white;
+  font-size: 18px;
+  font-family: 'Nunito Sans', sans-serif;
+  border-radius: 50px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 80px;
+  padding: 0;
+}
 
   .button:active {
     background-color: #5116C8;
