@@ -1,14 +1,13 @@
 <template>
     <Page actionBarHidden="true" class="page">
       <GridLayout rows="auto, *">
-        <!-- Шапка с кнопкой назад и заголовком -->
         <StackLayout row="0" class="header-section">
           <GridLayout columns="auto, *" class="header-content">
             <Image
               col="0"
               src="res://back"
-              width="32"
-              height="32"
+              width="27"
+              height="27"
               class="back-button"
               @tap="goBack"
             />
@@ -16,10 +15,9 @@
           </GridLayout>
         </StackLayout>
 
-        <!-- Основной контент с прокруткой -->
+        <!-- Основной контент -->
         <ScrollView row="1" class="content-scroll">
           <StackLayout class="content-container">
-            <!-- Картинка с затемнением и названием (исправлено: вместо псевдоэлемента используем отдельный View) -->
             <GridLayout class="image-container" rows="*" columns="*">
               <Image
                 row="0"
@@ -28,7 +26,6 @@
                 class="challenge-image"
                 stretch="aspectFill"
               />
-              <!-- Полупрозрачный градиент (заменили псевдоэлемент) -->
               <StackLayout row="0" col="0" class="image-overlay" />
               <Label
                 row="0"
@@ -39,16 +36,12 @@
               />
             </GridLayout>
 
-            <!-- Описание челленджа -->
             <Label :text="challenge.description" class="challenge-description" textWrap="true" />
 
-            <!-- Кнопка "Начать вызов" -->
             <Button text="Начать вызов" class="start-button" @tap="startChallenge" />
 
-            <!-- Еженедельная программа -->
             <Label text="Еженедельная программа" class="section-title" />
 
-            <!-- Карточки дней (аккордеон) -->
             <StackLayout v-for="(day, index) in challenge.weeklyProgram" :key="index" class="day-card">
               <GridLayout columns="*, auto" class="day-header" @tap="toggleDay(index)">
                 <Label col="0" :text="day.title" class="day-title" textWrap="true" />
@@ -69,17 +62,15 @@
               />
             </StackLayout>
 
-            <!-- Необходимые материалы -->
             <Label text="Необходимые материалы" class="section-title" />
 
             <StackLayout v-for="(material, idx) in challenge.materials" :key="idx" class="material-item">
               <GridLayout columns="auto, *">
-                <Label col="0" text="✔" class="check-icon" />
+                <Label col="0" text="✅" class="check-icon" />
                 <Label col="1" :text="material" class="material-text" textWrap="true" />
               </GridLayout>
             </StackLayout>
 
-            <!-- Пригласить друзей (увеличен отступ до кнопки) -->
             <Label text="Позовите друзей в вызов!" class="invite-title" />
             <Button text="Пригласить друзей" class="invite-button" @tap="inviteFriends" />
           </StackLayout>
@@ -143,8 +134,9 @@
     font-size: 24px;
     font-weight: 700;
     color: #181820;
-    margin-top: 20px;
-    margin-bottom: 40px; /* исправлено: удалён дубль */
+    margin-top: 27px;
+    margin-left: 20px;
+    margin-bottom: 40px;
   }
 
   .content-scroll {
@@ -265,19 +257,22 @@
   }
 
   .check-icon {
-    font-size: 24px;
-    color: #8E5EED;
-    margin-right: 12px;
+    background-color: #8E5EED;
     width: 24px;
+    height: 24px;
     text-align: center;
     vertical-align: center;
-  }
+    margin-right: 20px;
+    margin-left: 60px;
+}
 
   .material-text {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 15px;
     color: #363645;
     padding: 20px;
+    padding-left: 35px;
+    padding-right: 35px;
   }
 
   .invite-title {
@@ -299,6 +294,7 @@
     border-radius:50px;
     height: 140px;
     margin-bottom: 60px;
+    margin-top: 40px;
     box-shadow: 0px 4px 8px rgba(0,0,0,0.05);
   }
   </style>

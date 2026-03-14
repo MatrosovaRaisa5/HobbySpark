@@ -1,7 +1,6 @@
 <template>
     <Page actionBarHidden="true" class="page">
       <GridLayout rows="auto, *, auto">
-        <!-- Шапка -->
         <StackLayout row="0" class="header-section">
           <GridLayout columns="auto, *" class="header-content">
             <Image
@@ -14,17 +13,13 @@
             <Label col="1" text="Каталог хобби" class="header-title" />
           </GridLayout>
         </StackLayout>
-
-        <!-- Основной контент -->
         <ScrollView row="1" class="content-scroll">
           <StackLayout class="content-container">
-            <!-- Поиск -->
             <GridLayout columns="auto, *" class="search-container">
               <Label col="0" text="🔍" class="search-icon" />
               <TextField col="1" hint="Искать хобби..." class="search-input" />
             </GridLayout>
 
-            <!-- Фильтры -->
             <GridLayout columns="*, *" class="filters-row">
               <Button
                 col="0"
@@ -39,8 +34,6 @@
                 text="⭐ Сложность"
               />
             </GridLayout>
-
-            <!-- Сетка карточек с динамическими строками -->
             <GridLayout columns="*, *" :rows="rowsString" class="cards-grid">
               <StackLayout
                 v-for="(hobby, index) in hobbies"
@@ -64,8 +57,6 @@
             </GridLayout>
           </StackLayout>
         </ScrollView>
-
-        <!-- Нижнее меню -->
         <GridLayout row="2" columns="*, *, *, *" class="tabbar-menu">
           <StackLayout
             col="0"
@@ -113,11 +104,11 @@
   import { $navigateTo } from 'nativescript-vue'
   import { hobbiesData } from '~/data/hobbies'
   import ChallengeDetail from './ChallengeDetail.vue'
+  import ProfilePage from './ProfilePage.vue'
 
   const hobbies = ref(hobbiesData)
   const currentTab = ref('catalog')
 
-  // Вычисляем строки для GridLayout: по 2 элемента в строке
   const rowsString = computed(() => {
     const count = hobbies.value.length
     const rowsCount = Math.ceil(count / 2)
@@ -143,13 +134,12 @@
         // $navigateTo(HomePage)
         break
       case 'catalog':
-        // уже на каталоге
         break
       case 'progress':
         // $navigateTo(ProgressPage)
         break
       case 'profile':
-        // $navigateTo(ProfilePage)
+        $navigateTo(ProfilePage)
         break
     }
   }
