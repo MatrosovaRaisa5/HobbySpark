@@ -15,7 +15,6 @@
           </GridLayout>
         </StackLayout>
 
-        <!-- Основной контент -->
         <ScrollView row="1" class="content-scroll">
           <StackLayout class="content-container">
             <GridLayout class="image-container" rows="*" columns="*">
