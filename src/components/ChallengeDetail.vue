@@ -148,13 +148,13 @@
   .image-container {
     position: relative;
     width: 100%;
-    height: 450px;
+    height: 600px;
     margin-bottom: 7px;
   }
 
   .challenge-image {
     width: 100%;
-    height: 450px;
+    height: 600px;
   }
 
   .image-overlay {
@@ -174,7 +174,7 @@
     color: white;
     text-shadow: 0px 2px 4px rgba(24,24,32,0.15);
     text-align: center;
-    margin-top: 250px;
+    margin-top: 400px;
     z-index: 2;
   }
 
