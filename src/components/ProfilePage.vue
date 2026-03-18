@@ -102,6 +102,7 @@
 import { ref, computed } from 'nativescript-vue'
 import { $navigateTo } from 'nativescript-vue'
 import Settings from '~/components/Settings.vue'
+import AchievementsPage from './AchievementsPage.vue'
 
 const profile = {
   name: 'Раиса Матросова',
@@ -162,7 +163,7 @@ function goToSettings() {
 }
 
 function goToAchievements() {
-  console.log('Переход к достижениям')
+  $navigateTo(AchievementsPage)
 }
 </script>
 

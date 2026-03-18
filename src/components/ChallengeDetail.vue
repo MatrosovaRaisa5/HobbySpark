@@ -82,6 +82,7 @@
   import { ref, computed } from 'nativescript-vue'
   import { $navigateBack, $navigateTo } from 'nativescript-vue'
   import { challengesData } from '~/data/challengesData'
+  import DayTaskPage from './DayTaskPage.vue'
 
   const props = defineProps<{ challengeId: number }>()
 
@@ -100,7 +101,7 @@
   }
 
   function startChallenge() {
-    console.log('Начать вызов', challenge.value.title)
+    $navigateTo(DayTaskPage, { props: { challengeId: challenge.value.id } })
   }
 
   function inviteFriends() {
