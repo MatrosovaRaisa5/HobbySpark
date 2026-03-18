@@ -105,6 +105,7 @@
   import { hobbiesData } from '~/data/hobbies'
   import ChallengeDetail from './ChallengeDetail.vue'
   import ProfilePage from './ProfilePage.vue'
+  import ProgressPage from './ProgressPage.vue'
 
   const hobbies = ref(hobbiesData)
   const currentTab = ref('catalog')
@@ -136,7 +137,7 @@
       case 'catalog':
         break
       case 'progress':
-        // $navigateTo(ProgressPage)
+        $navigateTo(ProgressPage)
         break
       case 'profile':
         $navigateTo(ProfilePage)
