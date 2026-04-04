@@ -3,68 +3,18 @@
     <GridLayout rows="auto, *">
       <StackLayout row="0" class="white-header">
         <GridLayout columns="auto, *" class="header-content">
-          <Image
-            col="0"
-            src="res://back"
-            width="24"
-            height="24"
-            @tap="goBack"
-          />
+          <Image col="0" src="res://back" width="24" height="24" @tap="goBack" />
           <Label col="1" text="Регистрация" class="header-title" />
         </GridLayout>
-        <Label
-          text="Добро пожаловать в HobbySpark!"
-          class="header-subtitle"
-          textWrap="true"
-        />
+        <Label text="Добро пожаловать в HobbySpark!" class="header-subtitle" textWrap="true" />
       </StackLayout>
 
       <ScrollView row="1" class="form-scroll">
         <StackLayout class="form-container">
-          <!-- Имя -->
-          <StackLayout class="textbox">
-            <TextField hint="Имя" class="input" />
-          </StackLayout>
-          <StackLayout class="textbox">
-            <TextField hint="Фамилия" class="input" />
-          </StackLayout>
-
-          <GridLayout columns="auto, *" class="phone-container">
-            <Label col="0" text="+7" class="phone-prefix" />
-            <TextField
-              col="1"
-              hint=""
-              keyboardType="phone"
-              class="input phone-input"
-            />
-          </GridLayout>
-
-          <Label
-            text="Мы отправим код подтверждения на ваш номер телефона"
-            class="info-text"
-            textWrap="true"
-          />
-
-          <Button
-            @tap="requestCode"
-            text="Получить код"
-            class="button"
-          />
-
-          <StackLayout v-if="codeRequested" class="textbox">
-            <TextField
-              hint="Код подтверждения"
-              keyboardType="number"
-              class="input"
-            />
-          </StackLayout>
-
-          <Button
-            v-if="codeRequested"
-            @tap="register"
-            text="Зарегистрироваться"
-            class="button"
-          />
+          <TextField v-model="login" hint="Логин" class="input" />
+          <TextField v-model="password" hint="Пароль" secure="true" class="input" />
+          <TextField v-model="name" hint="Ваше имя" class="input" />
+          <Button @tap="doRegister" text="Зарегистрироваться" class="button" />
         </StackLayout>
       </ScrollView>
     </GridLayout>
@@ -73,25 +23,31 @@
 
 <script lang="ts" setup>
 import { ref } from 'nativescript-vue'
-import { $navigateBack, $navigateTo } from 'nativescript-vue'
-import InterestsSelection from './InterestsSelection.vue'
+import { $navigateBack } from 'nativescript-vue'
+import { Dialogs, ApplicationSettings } from '@nativescript/core'
+import { api } from '~/services/api'
 
-const codeRequested = ref(false)
+const login = ref('')
+const password = ref('')
+const name = ref('')
 
-function requestCode() {
-  codeRequested.value = true
+async function doRegister() {
+  if (!login.value || !password.value || !name.value) {
+    await Dialogs.alert('Заполните все поля')
+    return
+  }
+  try {
+    await api.signup(login.value, password.value, name.value)
+    ApplicationSettings.setString('reg_name', name.value)
+    ApplicationSettings.setString('reg_login', login.value)
+    await Dialogs.alert('Регистрация успешна! Теперь войдите.')
+    $navigateBack()
+  } catch (err: any) {
+    await Dialogs.alert('Ошибка: ' + err.message)
+  }
 }
 
-function register() {
-  console.log('Регистрация завершена')
-  // Добавить логику для создания аккаунта
-  // Переход на экран выбора интересов
-  $navigateTo(InterestsSelection)
-}
-
-function goBack() {
-  $navigateBack()
-}
+function goBack() { $navigateBack() }
 </script>
 
 <style scoped>
@@ -140,7 +96,7 @@ function goBack() {
 }
 
 .input {
-  width: 97%;
+  width: 90%;
   height: 140px;
   padding: 20px;
   font-size: 16px;
@@ -149,6 +105,7 @@ function goBack() {
   border-width: 6px;
   border-color: #8b60e0;
   border-radius: 50px;
+  margin-bottom: 30px;
 }
 
 .info-text {

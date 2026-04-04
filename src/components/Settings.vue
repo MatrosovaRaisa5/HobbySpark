@@ -1,118 +1,122 @@
 <template>
-    <Page actionBarHidden="true" class="page">
-      <GridLayout rows="auto, *">
-        <StackLayout row="0" class="header-section">
-          <GridLayout columns="auto, *" class="header-content">
-            <Image
-              col="0"
-              src="res://back"
-              width="27"
-              height="27"
-              class="back-button"
-              @tap="goBack"
-            />
-            <Label col="1" text="Настройки" class="header-title" />
-          </GridLayout>
-        </StackLayout>
-        <ScrollView row="1" class="content-scroll">
-          <StackLayout class="content-container">
-            <StackLayout class="settings-block">
-              <Label text="Основные" class="block-title" />
+  <Page actionBarHidden="true" class="page">
+    <GridLayout rows="auto, *">
+      <StackLayout row="0" class="header-section">
+        <GridLayout columns="auto, *" class="header-content">
+          <Image
+            col="0"
+            src="res://back"
+            width="27"
+            height="27"
+            class="back-button"
+            @tap="goBack"
+          />
+          <Label col="1" text="Настройки" class="header-title" />
+        </GridLayout>
+      </StackLayout>
+      <ScrollView row="1" class="content-scroll">
+        <StackLayout class="content-container">
+          <StackLayout class="settings-block">
+            <Label text="Основные" class="block-title" />
 
-              <GridLayout columns="*, auto" class="settings-card" @tap="goToPersonalData">
-                <StackLayout col="0" class="card-text-container">
-                  <Label text="Личные данные" class="card-main-text" />
-                  <Label text="Управляйте вашей учетной записью и профилем" class="card-sub-text" textWrap="true" />
-                </StackLayout>
-                <Image col="1" src="res://next" width="20" height="20" class="card-arrow" />
-              </GridLayout>
+            <GridLayout columns="*, auto" class="settings-card" @tap="goToPersonalData">
+              <StackLayout col="0" class="card-text-container">
+                <Label text="Личные данные" class="card-main-text" />
+                <Label text="Управляйте вашей учетной записью и профилем" class="card-sub-text" textWrap="true" />
+              </StackLayout>
+              <Image col="1" src="res://next" width="20" height="20" class="card-arrow" />
+            </GridLayout>
 
-              <GridLayout columns="*, auto" class="settings-card" @tap="goToLanguage">
-                <StackLayout col="0" class="card-text-container">
-                  <Label text="Язык" class="card-main-text" />
-                  <Label text="Измените язык интерфейса приложения" class="card-sub-text" textWrap="true" />
-                </StackLayout>
-                <Image col="1" src="res://next" width="20" height="20" class="card-arrow" />
-              </GridLayout>
-            </StackLayout>
+            <GridLayout columns="*, auto" class="settings-card" @tap="goToLanguage">
+              <StackLayout col="0" class="card-text-container">
+                <Label text="Язык" class="card-main-text" />
+                <Label text="Измените язык интерфейса приложения" class="card-sub-text" textWrap="true" />
+              </StackLayout>
+              <Image col="1" src="res://next" width="20" height="20" class="card-arrow" />
+            </GridLayout>
+          </StackLayout>
 
-            <StackLayout class="settings-block">
+          <StackLayout class="settings-block">
             <Label text="Уведомления" class="block-title" />
 
             <GridLayout columns="*, auto" class="settings-card">
-                <StackLayout col="0" class="card-text-container">
+              <StackLayout col="0" class="card-text-container">
                 <Label text="Разрешить все уведомления" class="card-main-text" />
                 <Label text="Получайте все уведомления: ваши искры и достижения" class="card-sub-text" textWrap="true" />
-                </StackLayout>
+              </StackLayout>
 
-                <GridLayout col="1"
-                            class="switch-container"
-                            @tap="toggleNotifications"
-                            :backgroundColor="notificationsEnabled ? '#8E5EED' : '#BDC1CA'">
+              <GridLayout col="1"
+                          class="switch-container"
+                          @tap="toggleNotifications"
+                          :backgroundColor="notificationsEnabled ? '#8E5EED' : '#BDC1CA'">
                 <GridLayout :col="notificationsEnabled ? 1 : 0"
                             width="20" height="20"
                             borderRadius="10"
                             backgroundColor="white"
                             margin="2" />
-                </GridLayout>
+              </GridLayout>
             </GridLayout>
-            </StackLayout>
-
-            <StackLayout class="settings-block">
-              <Label text="Аккаунт" class="block-title" />
-
-              <GridLayout columns="*, auto" class="settings-card">
-                <StackLayout col="0" class="card-text-container">
-                  <Label text="Выход из аккаунта" class="card-main-text" />
-                  <Label text="Завершить текущий сеанс" class="card-sub-text" textWrap="true" />
-                </StackLayout>
-                <Button col="1" text="Выйти" class="action-button logout-button" @tap="logout" />
-              </GridLayout>
-
-              <GridLayout columns="*, auto" class="settings-card">
-                <StackLayout col="0" class="card-text-container">
-                  <Label text="Удаление данных" class="card-main-text" />
-                  <Label text="Удалить все данные и аккаунт" class="card-sub-text" textWrap="true" />
-                </StackLayout>
-                <Button col="1" text="Удалить" class="action-button delete-button" @tap="deleteAccount" />
-              </GridLayout>
-            </StackLayout>
           </StackLayout>
-        </ScrollView>
-      </GridLayout>
-    </Page>
-  </template>
 
-  <script lang="ts" setup>
-  import { ref } from 'nativescript-vue'
-  import { $navigateBack } from 'nativescript-vue'
+          <StackLayout class="settings-block">
+            <Label text="Аккаунт" class="block-title" />
 
-  const notificationsEnabled = ref(true)
+            <GridLayout columns="*, auto" class="settings-card">
+              <StackLayout col="0" class="card-text-container">
+                <Label text="Выход из аккаунта" class="card-main-text" />
+                <Label text="Завершить текущий сеанс" class="card-sub-text" textWrap="true" />
+              </StackLayout>
+              <Button col="1" text="Выйти" class="action-button logout-button" @tap="logout" />
+            </GridLayout>
 
-  function toggleNotifications() {
-    notificationsEnabled.value = !notificationsEnabled.value
-  }
+            <GridLayout columns="*, auto" class="settings-card">
+              <StackLayout col="0" class="card-text-container">
+                <Label text="Удаление данных" class="card-main-text" />
+                <Label text="Удалить все данные и аккаунт" class="card-sub-text" textWrap="true" />
+              </StackLayout>
+              <Button col="1" text="Удалить" class="action-button delete-button" @tap="deleteAccount" />
+            </GridLayout>
+          </StackLayout>
+        </StackLayout>
+      </ScrollView>
+    </GridLayout>
+  </Page>
+</template>
 
-  function goBack() {
-    $navigateBack()
-  }
+<script lang="ts" setup>
+import { ref } from 'nativescript-vue'
+import { $navigateBack, $navigateTo } from 'nativescript-vue'
+import { ApplicationSettings, Dialogs } from '@nativescript/core'
+import LoginPage from './LoginPage.vue'
+import PersonalDataPage from './PersonalDataPage.vue'
 
-  function goToPersonalData() {
-    console.log('Переход к личным данным')
-  }
+const notificationsEnabled = ref(true)
 
-  function goToLanguage() {
-    console.log('Переход к настройкам языка')
-  }
+function toggleNotifications() {
+  notificationsEnabled.value = !notificationsEnabled.value
+}
 
-  function logout() {
-    console.log('Выход из аккаунта')
-  }
+function goBack() { $navigateBack() }
+function goToPersonalData() { $navigateTo(PersonalDataPage) }
+function goToLanguage() { console.log('Переход к языку') }
 
-  function deleteAccount() {
-    console.log('Удаление аккаунта')
-  }
-  </script>
+function logout() {
+  ApplicationSettings.remove('access_token')
+  ApplicationSettings.remove('refresh_token')
+  ApplicationSettings.remove('user_name')
+  ApplicationSettings.remove('user_login')
+  $navigateTo(LoginPage, { clearHistory: true })
+}
+
+function deleteAccount() {
+  Dialogs.confirm('Удалить аккаунт? Это необратимо.').then(async (ok) => {
+    if (ok) {
+      await Dialogs.alert('Функция удаления пока не реализована на сервере')
+    }
+  })
+}
+</script>
+
 
   <style scoped>
   .page {

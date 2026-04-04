@@ -3,60 +3,18 @@
     <GridLayout rows="auto, *">
       <StackLayout row="0" class="white-header">
         <GridLayout columns="auto, *" class="header-content">
-          <Image
-            col="0"
-            src="res://back"
-            width="24"
-            height="24"
-            @tap="goBack"
-          />
+          <Image col="0" src="res://back" width="24" height="24" @tap="goBack" />
           <Label col="1" text="Вход" class="header-title" />
         </GridLayout>
-        <Label
-          text="Добро пожаловать в HobbySpark!"
-          class="header-subtitle"
-          textWrap="true"
-        />
+        <Label text="Добро пожаловать в HobbySpark!" class="header-subtitle" textWrap="true" />
       </StackLayout>
 
       <ScrollView row="1" class="form-scroll">
         <StackLayout class="form-container">
-          <GridLayout columns="auto, *" class="phone-container">
-            <Label col="0" text="+7" class="phone-prefix" />
-            <TextField
-              col="1"
-              hint=""
-              keyboardType="phone"
-              class="input phone-input"
-            />
-          </GridLayout>
-
-          <Label
-            text="Мы отправим код подтверждения на ваш номер телефона"
-            class="info-text"
-            textWrap="true"
-          />
-
-          <Button
-            @tap="requestCode"
-            text="Получить код"
-            class="button"
-          />
-
-          <StackLayout v-if="codeRequested" class="textbox">
-            <TextField
-              hint="Код подтверждения"
-              keyboardType="number"
-              class="input"
-            />
-          </StackLayout>
-
-          <Button
-            v-if="codeRequested"
-            @tap="login"
-            text="Войти"
-            class="button"
-          />
+          <TextField v-model="login" hint="Логин" keyboardType="email" class="input" />
+          <TextField v-model="password" hint="Пароль" secure="true" class="input" />
+          <Button @tap="doLogin" text="Войти" class="button" />
+          <Label text="Нет аккаунта? Зарегистрируйтесь" class="info-text" textWrap="true" @tap="goToRegister" />
         </StackLayout>
       </ScrollView>
     </GridLayout>
@@ -65,23 +23,37 @@
 
 <script lang="ts" setup>
 import { ref } from 'nativescript-vue'
-import { $navigateBack } from 'nativescript-vue'
+import { $navigateBack, $navigateTo } from 'nativescript-vue'
+import { Dialogs, ApplicationSettings } from '@nativescript/core'
+import { api } from '~/services/api'
+import RegisterPage from './RegisterPage.vue'
+import CatalogPage from './CatalogPage.vue'
 
-const codeRequested = ref(false)
+const login = ref('')
+const password = ref('')
 
-function requestCode() {
-  codeRequested.value = true
+async function doLogin() {
+  if (!login.value || !password.value) {
+    await Dialogs.alert('Введите логин и пароль')
+    return
+  }
+  try {
+    const result = await api.login(login.value, password.value)
+    ApplicationSettings.setString('access_token', result.access_token)
+    ApplicationSettings.setString('refresh_token', result.refresh_token)
+    ApplicationSettings.setString('user_name', login.value) // временно, пока не обновим через профиль
+    ApplicationSettings.setString('user_login', login.value)
+    $navigateTo(CatalogPage, { clearHistory: true })
+  } catch (err: any) {
+    await Dialogs.alert('Ошибка входа: ' + err.message)
+  }
 }
 
-function login() {
-  console.log('Вход выполнен')
-  // Здесь добавить логику проверки кода и входа
-}
-
-function goBack() {
-  $navigateBack()
-}
+function goBack() { $navigateBack() }
+function goToRegister() { $navigateTo(RegisterPage) }
 </script>
+
+
 
 <style scoped>
 .page-gradient {
@@ -138,6 +110,7 @@ function goBack() {
   border-width: 6px;
   border-color: #8b60e0;
   border-radius: 50px;
+  margin-bottom: 30px;
 }
 
 .info-text {
@@ -160,6 +133,7 @@ function goBack() {
   border-radius: 50px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
   margin-bottom: 80px;
+  margin-top: 60px;
   padding: 0;
 }
 

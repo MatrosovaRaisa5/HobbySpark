@@ -3,50 +3,27 @@
     <GridLayout rows="auto, *">
       <StackLayout row="0" class="header-section">
         <GridLayout columns="auto, *, auto" class="header-content">
-          <Image
-            col="0"
-            src="res://icon"
-            width="60"
-            height="60"
-            class="app-icon"
-          />
+          <Image col="0" src="res://icon" width="60" height="60" class="app-icon" />
           <Label col="1" text="Профиль" class="header-title" />
-          <Image
-            col="2"
-            src="res://setting"
-            width="27"
-            height="27"
-            class="settings-icon"
-            @tap="goToSettings"
-          />
+          <Image col="2" src="res://setting" width="27" height="27" class="settings-icon" @tap="goToSettings" />
         </GridLayout>
       </StackLayout>
 
       <ScrollView row="1" class="content-scroll">
         <StackLayout class="content-container">
           <StackLayout class="profile-header">
-            <Image src="res://user" class="avatar" />
+            <Image :src="profile.avatar" class="avatar" />
             <Label :text="profile.name" class="profile-name" />
             <Label :text="'Уровень ' + profile.level" class="profile-level" />
           </StackLayout>
 
           <GridLayout columns="*, auto" class="section-header">
             <Label col="0" text="Достижения и скидки" class="section-title" />
-            <Label
-              col="1"
-              text="Посмотреть все"
-              class="view-all-label"
-              @tap="goToAchievements"
-            />
+            <Label col="1" text="Посмотреть все" class="view-all-label" @tap="goToAchievements" />
           </GridLayout>
 
           <GridLayout columns="*, *, *" class="achievements-grid">
-            <StackLayout
-              v-for="(item, idx) in achievements"
-              :key="idx"
-              :col="idx"
-              class="achievement-card"
-            >
+            <StackLayout v-for="(item, idx) in achievements" :key="idx" :col="idx" class="achievement-card">
               <Image :src="item.image" class="achievement-image" />
               <Label :text="item.title" class="achievement-title" textWrap="true" />
             </StackLayout>
@@ -54,40 +31,19 @@
 
           <GridLayout columns="*, auto" class="section-header">
             <Label col="0" text="Мои искры" class="section-title" />
-            <Label
-              v-if="mySparks.length > 2"
-              col="1"
-              :text="showAllMySparks ? 'Свернуть' : 'Посмотреть все'"
-              class="view-all-label"
-              @tap="toggleMySparks"
-            />
+            <Label v-if="mySparks.length > 2" col="1" :text="showAllMySparks ? 'Свернуть' : 'Посмотреть все'" class="view-all-label" @tap="toggleMySparks" />
           </GridLayout>
 
           <StackLayout class="sparks-list">
-            <GridLayout
-              v-for="spark in displayedSparks"
-              :key="spark.id"
-              columns="auto, *"
-              class="spark-item"
-            >
+            <GridLayout v-for="spark in displayedSparks" :key="spark.id" columns="auto, *" class="spark-item">
               <Image col="0" :src="spark.image" class="spark-image" />
               <StackLayout col="1" class="spark-info">
                 <Label :text="spark.title" class="spark-title" />
                 <GridLayout columns="*, auto" class="progress-row">
-                  <!-- Исправленный прогресс-бар с двумя колонками -->
-                  <GridLayout
-                    col="0"
-                    :columns="progressColumns(spark)"
-                    class="progress-bg"
-                  >
+                  <GridLayout col="0" :columns="progressColumns(spark)" class="progress-bg">
                     <StackLayout col="0" class="progress-fill" />
-                    <!-- Вторая колонка пустая – фон progress-bg отображается как серая часть -->
                   </GridLayout>
-                  <Label
-                    col="1"
-                    :text="'День ' + spark.currentDay + ' из ' + spark.totalDays"
-                    class="progress-text"
-                  />
+                  <Label col="1" :text="'День ' + spark.currentDay + ' из ' + spark.totalDays" class="progress-text" />
                 </GridLayout>
               </StackLayout>
             </GridLayout>
@@ -99,15 +55,18 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'nativescript-vue'
+import { ref, computed, onMounted } from 'nativescript-vue'
 import { $navigateTo } from 'nativescript-vue'
+import { ApplicationSettings } from '@nativescript/core'
 import Settings from '~/components/Settings.vue'
 import AchievementsPage from './AchievementsPage.vue'
 
-const profile = {
-  name: 'Раиса Матросова',
+// Данные из локального хранилища (API не даёт GET /users/me)
+const profile = ref({
+  name: ApplicationSettings.getString('user_name', 'Пользователь'),
   level: 3,
-}
+  avatar: 'res://user'
+})
 
 const achievements = ref([
   { title: 'Ранняя пташка', image: 'res://achievement1' },
@@ -116,27 +75,9 @@ const achievements = ref([
 ])
 
 const mySparks = ref([
-  {
-    id: 1,
-    title: 'Твоя искра в акварели',
-    image: 'res://art',
-    currentDay: 1,
-    totalDays: 7,
-  },
-  {
-    id: 2,
-    title: 'Твоя искра в гитаре',
-    image: 'res://guitar',
-    currentDay: 3,
-    totalDays: 7,
-  },
-  {
-    id: 3,
-    title: 'Твоя искра в кулинарии',
-    image: 'res://food',
-    currentDay: 5,
-    totalDays: 7,
-  },
+  { id: 1, title: 'Твоя искра в акварели', image: 'res://art', currentDay: 1, totalDays: 7 },
+  { id: 2, title: 'Твоя искра в гитаре', image: 'res://guitar', currentDay: 3, totalDays: 7 },
+  { id: 3, title: 'Твоя искра в кулинарии', image: 'res://food', currentDay: 5, totalDays: 7 },
 ])
 
 const showAllMySparks = ref(false)
@@ -145,27 +86,25 @@ const displayedSparks = computed(() => {
   return showAllMySparks.value ? mySparks.value : mySparks.value.slice(0, 2)
 })
 
-// Функция для задания пропорций колонок прогресс-бара
 function progressColumns(spark: { currentDay: number; totalDays: number }) {
   const percent = (spark.currentDay / spark.totalDays) * 100
-  // Защита от деления на ноль и крайних значений
   if (percent >= 100) return '100*, 0*'
   if (percent <= 0) return '0*, 100*'
   return `${percent}*, ${100 - percent}*`
 }
 
-function toggleMySparks() {
-  showAllMySparks.value = !showAllMySparks.value
-}
+function toggleMySparks() { showAllMySparks.value = !showAllMySparks.value }
+function goToSettings() { $navigateTo(Settings) }
+function goToAchievements() { $navigateTo(AchievementsPage) }
 
-function goToSettings() {
-  $navigateTo(Settings)
-}
-
-function goToAchievements() {
-  $navigateTo(AchievementsPage)
-}
+// Можно при загрузке обновить имя из хранилища
+onMounted(() => {
+  const savedName = ApplicationSettings.getString('user_name')
+  if (savedName) profile.value.name = savedName
+})
 </script>
+
+
 
 <style scoped>
 .page {
