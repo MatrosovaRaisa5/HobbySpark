@@ -41,8 +41,17 @@ async function doLogin() {
     const result = await api.login(login.value, password.value)
     ApplicationSettings.setString('access_token', result.access_token)
     ApplicationSettings.setString('refresh_token', result.refresh_token)
-    ApplicationSettings.setString('user_name', login.value) // временно, пока не обновим через профиль
+
+    // Берём имя из временного хранилища (если регистрировались только что)
+    const pendingName = ApplicationSettings.getString('pending_user_name')
+    if (pendingName) {
+      ApplicationSettings.setString('user_name', pendingName)
+      ApplicationSettings.remove('pending_user_name')
+    } else {
+      ApplicationSettings.setString('user_name', login.value)
+    }
     ApplicationSettings.setString('user_login', login.value)
+
     $navigateTo(CatalogPage, { clearHistory: true })
   } catch (err: any) {
     await Dialogs.alert('Ошибка входа: ' + err.message)
@@ -52,8 +61,6 @@ async function doLogin() {
 function goBack() { $navigateBack() }
 function goToRegister() { $navigateTo(RegisterPage) }
 </script>
-
-
 
 <style scoped>
 .page-gradient {

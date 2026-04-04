@@ -38,8 +38,7 @@ async function doRegister() {
   }
   try {
     await api.signup(login.value, password.value, name.value)
-    ApplicationSettings.setString('reg_name', name.value)
-    ApplicationSettings.setString('reg_login', login.value)
+    ApplicationSettings.setString('pending_user_name', name.value)
     await Dialogs.alert('Регистрация успешна! Теперь войдите.')
     $navigateBack()
   } catch (err: any) {

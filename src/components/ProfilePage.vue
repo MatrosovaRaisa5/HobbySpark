@@ -3,9 +3,23 @@
     <GridLayout rows="auto, *">
       <StackLayout row="0" class="header-section">
         <GridLayout columns="auto, *, auto" class="header-content">
-          <Image col="0" src="res://icon" width="60" height="60" class="app-icon" />
+          <Image
+            col="0"
+            src="res://back"
+            width="24"
+            height="24"
+            class="back-button"
+            @tap="goBack"
+          />
           <Label col="1" text="Профиль" class="header-title" />
-          <Image col="2" src="res://setting" width="27" height="27" class="settings-icon" @tap="goToSettings" />
+          <Image
+            col="2"
+            src="res://setting"
+            width="27"
+            height="27"
+            class="settings-icon"
+            @tap="goToSettings"
+          />
         </GridLayout>
       </StackLayout>
 
@@ -56,12 +70,11 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'nativescript-vue'
-import { $navigateTo } from 'nativescript-vue'
+import { $navigateTo, $navigateBack } from 'nativescript-vue'
 import { ApplicationSettings } from '@nativescript/core'
 import Settings from '~/components/Settings.vue'
 import AchievementsPage from './AchievementsPage.vue'
 
-// Данные из локального хранилища (API не даёт GET /users/me)
 const profile = ref({
   name: ApplicationSettings.getString('user_name', 'Пользователь'),
   level: 3,
@@ -96,15 +109,13 @@ function progressColumns(spark: { currentDay: number; totalDays: number }) {
 function toggleMySparks() { showAllMySparks.value = !showAllMySparks.value }
 function goToSettings() { $navigateTo(Settings) }
 function goToAchievements() { $navigateTo(AchievementsPage) }
+function goBack() { $navigateBack() }
 
-// Можно при загрузке обновить имя из хранилища
 onMounted(() => {
   const savedName = ApplicationSettings.getString('user_name')
   if (savedName) profile.value.name = savedName
 })
 </script>
-
-
 
 <style scoped>
 .page {
@@ -122,8 +133,8 @@ onMounted(() => {
   align-items: center;
 }
 
-.app-icon {
-  margin-right: 8px;
+.back-button {
+  margin-right: 14px;
 }
 
 .header-title {
@@ -131,6 +142,7 @@ onMounted(() => {
   font-size: 24px;
   font-weight: 700;
   color: #181820;
+  text-align: center;
 }
 
 .settings-icon {
