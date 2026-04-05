@@ -101,7 +101,7 @@
   }
 
   function startChallenge() {
-    $navigateTo(DayTaskPage, { props: { challengeId: challenge.value.id } })
+    $navigateTo(DayTaskPage, { props: { challengeId: challenge.value.id, day: 1 } })
   }
 
   function inviteFriends() {

@@ -117,6 +117,7 @@ import { hobbiesData } from '~/data/hobbies'
 import ChallengeDetail from './ChallengeDetail.vue'
 import ProfilePage from './ProfilePage.vue'
 import ProgressPage from './ProgressPage.vue'
+import MainPage from './MainPage.vue'
 
 const hobbies = ref(hobbiesData)
 const currentTab = ref('catalog')
@@ -206,6 +207,7 @@ function goToTab(tab: string) {
   currentTab.value = tab
   switch (tab) {
     case 'home':
+      $navigateTo(MainPage)
       break
     case 'catalog':
       break

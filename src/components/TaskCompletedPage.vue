@@ -194,25 +194,9 @@ function onPageLoaded(args: any) {
 
 // ── Навигация ──
 function goToMain() {
-  /*
-    Используем Frame.topmost().navigate() с transition: 'slideBottom'
-    — страница красиво уходит вниз, MainPage появляется нормально без сжатия.
-    clearHistory: true очищает стек навигации (чтобы не было кнопки "назад").
-  */
-  Frame.topmost().navigate({
-    create: () => {
-      const { createPage } = require('nativescript-vue')
-      return createPage(MainPage)
-    },
-    clearHistory: true,
-    animated: true,
-    transition: {
-      name: 'slideBottom',
-      duration: 350,
-      curve: 'easeIn',
-    },
-  })
+  $navigateTo(MainPage, { clearHistory: true })
 }
+ 
 
 function shareResult() {
   console.log('Share result')
