@@ -3,14 +3,7 @@
     <GridLayout rows="auto, *">
       <StackLayout row="0" class="header-section">
         <GridLayout columns="auto, *" class="header-content">
-          <Image
-            col="0"
-            src="res://back"
-            width="27"
-            height="27"
-            class="back-button"
-            @tap="goBack"
-          />
+          <Image col="0" src="res://back" width="27" height="27" class="back-button" @tap="goBack" />
           <Label col="1" text="Достижения и скидки" class="header-title" />
         </GridLayout>
       </StackLayout>
@@ -18,113 +11,99 @@
       <ScrollView row="1" class="content-scroll">
         <StackLayout class="content-container">
 
-          <!-- Achievements section -->
-          <GridLayout columns="*, auto" class="section-header-row">
+          <!-- ── Достижения ── -->
+          <GridLayout columns="*, auto" class="section-hdr-row">
             <Label col="0" text="Мои достижения" class="section-title" />
             <Label col="1" text="Посмотреть все" class="section-link" @tap="viewAllAchievements" />
           </GridLayout>
 
-          <!-- Achievement 1: Ранняя пташка (unlocked) -->
-          <StackLayout class="achievement-card achievement-unlocked">
-            <GridLayout columns="*, auto" class="achievement-inner">
+          <StackLayout
+            v-for="(ach, idx) in achievements"
+            :key="idx"
+            :class="['ach-card', ach.unlocked ? 'ach-unlocked' : 'ach-locked']"
+          >
+            <GridLayout columns="*, auto" class="ach-inner">
               <StackLayout col="0">
-                <Label text="Ранняя пташка" class="achievement-name" />
-                <Label text="Получено: 10 февраля 2026" class="achievement-date" />
-              </StackLayout>
-              <StackLayout col="1" class="achievement-badge-wrap achievement-badge-purple">
-                <Label text="🕐" class="achievement-badge-icon" />
-              </StackLayout>
-            </GridLayout>
-            <Label text="Завершите первое задание до полудня" class="achievement-desc" textWrap="true" />
-          </StackLayout>
+                <!-- Название -->
+                <Label :text="ach.name" :class="['ach-name', ach.unlocked ? 'ach-name-done' : '']" />
 
-          <!-- Achievement 2: Творческий ум (unlocked) -->
-          <StackLayout class="achievement-card achievement-unlocked">
-            <GridLayout columns="*, auto" class="achievement-inner">
-              <StackLayout col="0">
-                <Label text="Творческий ум" class="achievement-name" />
-                <Label text="Получено: 18 февраля 2026" class="achievement-date" />
-              </StackLayout>
-              <StackLayout col="1" class="achievement-badge-wrap achievement-badge-purple">
-                <Label text="🎨" class="achievement-badge-icon" />
-              </StackLayout>
-            </GridLayout>
-            <Label text="Начните свой первый творческий челлендж" class="achievement-desc" textWrap="true" />
-          </StackLayout>
+                <!-- Получено / в прогрессе -->
+                <Label v-if="ach.unlocked" :text="'Получено: ' + ach.date" class="ach-date" />
+                <Label v-else :text="'Прогресс: ' + ach.progress + '/100'" class="ach-prog-lbl" />
 
-          <!-- Achievement 3: Шаг к здоровью (in progress) -->
-          <StackLayout class="achievement-card">
-            <GridLayout columns="*, auto" class="achievement-inner">
-              <StackLayout col="0">
-                <Label text="Шаг к здоровью" class="achievement-name achievement-name-progress" />
-                <Label text="Прогресс: 75/100" class="achievement-progress-label" />
-                <StackLayout class="progress-bar-bg">
-                  <StackLayout class="progress-bar-fill" width="75%" />
+                <!--
+                  ПРОГРЕСС-БАР через GridLayout columns
+                  Работает надёжно в NativeScript в отличие от width: x%
+                -->
+                <GridLayout
+                  v-if="!ach.unlocked"
+                  :columns="progressCols(ach.progress)"
+                  class="ach-track"
+                >
+                  <StackLayout col="0" class="ach-filled" />
+                  <StackLayout col="1" class="ach-empty" />
+                </GridLayout>
+
+                <!-- Прогресс-бар для выполненных (100%) -->
+                <StackLayout v-else class="ach-track-done">
+                  <StackLayout class="ach-filled-done" />
                 </StackLayout>
               </StackLayout>
-              <StackLayout col="1" class="achievement-badge-wrap achievement-badge-gray">
-                <Label text="👟" class="achievement-badge-icon" />
+
+              <!-- Иконка-бейдж -->
+              <StackLayout col="1" :class="['ach-badge', ach.unlocked ? 'ach-badge-purple' : 'ach-badge-gray']">
+                <Label :text="ach.icon" class="ach-badge-icon" />
               </StackLayout>
             </GridLayout>
-            <Label text="Пробегите свои первые 10 километров" class="achievement-desc" textWrap="true" />
+
+            <!-- Описание -->
+            <Label :text="ach.desc" class="ach-desc" textWrap="true" />
           </StackLayout>
 
-          <!-- Achievement 4: Языковой эксперт (locked) -->
-          <StackLayout class="achievement-card">
-            <GridLayout columns="*, auto" class="achievement-inner">
-              <StackLayout col="0">
-                <Label text="Языковой эксперт" class="achievement-name achievement-name-progress" />
-                <Label text="Прогресс: 0/100" class="achievement-progress-label" />
-                <StackLayout class="progress-bar-bg">
-                  <StackLayout class="progress-bar-fill" width="0%" />
-                </StackLayout>
-              </StackLayout>
-              <StackLayout col="1" class="achievement-badge-wrap achievement-badge-gray">
-                <Label text="🈵" class="achievement-badge-icon" />
-              </StackLayout>
-            </GridLayout>
-            <Label text="Проведите 10 часов за изучением языков" class="achievement-desc" textWrap="true" />
-          </StackLayout>
-
-          <!-- Coupons section -->
+          <!-- ── Купоны ── -->
           <Label text="Купоны и скидки от спонсоров" class="section-title section-title-margin" />
 
-          <!-- Coupon 1 -->
-          <StackLayout class="coupon-card">
+          <StackLayout
+            v-for="(coupon, idx) in coupons"
+            :key="'c' + idx"
+            class="coupon-card"
+          >
             <GridLayout columns="auto, *, auto" class="coupon-inner">
-              <StackLayout col="0" class="coupon-icon-wrap coupon-icon-purple">
+              <!-- Иконка -->
+              <StackLayout col="0" :class="['coupon-icon-wrap', coupon.colorClass]">
                 <Label text="%" class="coupon-icon" />
               </StackLayout>
-              <StackLayout col="1" class="coupon-text-wrap">
-                <Label text="Скидка 20% в Coffee House" class="coupon-title" textWrap="true" />
-                <Label text="Действует до 30 июня" class="coupon-subtitle" />
+
+              <!-- Текст -->
+              <StackLayout col="1" class="coupon-text">
+                <Label :text="coupon.title" class="coupon-title" textWrap="true" />
+                <Label :text="coupon.subtitle" class="coupon-subtitle" />
               </StackLayout>
-              <Button col="2" text="Забрать" class="coupon-button" @tap="claimCoupon(1)" />
+
+              <!--
+                Кнопка "Забрать":
+                - открывает URL если задан
+                - анимирует нажатие (меняет цвет на зелёный)
+              -->
+              <StackLayout
+                col="2"
+                :class="['coupon-btn-wrap', coupon.claimed ? 'coupon-btn-claimed' : 'coupon-btn-active']"
+                @tap="claimCoupon(idx)"
+              >
+                <Label :text="coupon.claimed ? '✓' : 'Забрать'" class="coupon-btn-lbl" />
+              </StackLayout>
             </GridLayout>
+
+            <!-- Срок действия / статус -->
+            <Label v-if="coupon.claimed" text="Купон активирован ✓" class="coupon-claimed-msg" />
           </StackLayout>
 
-          <!-- Coupon 2 -->
-          <StackLayout class="coupon-card">
-            <GridLayout columns="auto, *, auto" class="coupon-inner">
-              <StackLayout col="0" class="coupon-icon-wrap coupon-icon-orange">
-                <Label text="%" class="coupon-icon" />
-              </StackLayout>
-              <StackLayout col="1" class="coupon-text-wrap">
-                <Label text="-15% на спортивные товары" class="coupon-title" textWrap="true" />
-                <Label text="Для активных пользователей" class="coupon-subtitle" />
-              </StackLayout>
-              <Button col="2" text="Забрать" class="coupon-button" @tap="claimCoupon(2)" />
-            </GridLayout>
-          </StackLayout>
-
-          <!-- More coupons -->
-          <StackLayout class="more-coupons-row">
-            <GridLayout columns="auto, *" class="more-coupons-inner">
-              <Label col="0" text="💎" class="more-coupons-gem" />
-              <GridLayout col="1" columns="*, auto">
-                <Label col="0" text="Ещё 12 доступных скидок" class="more-coupons-text" textWrap="true" />
-                <Label col="1" text="Посмотреть" class="more-coupons-link" @tap="viewAllCoupons" />
-              </GridLayout>
+          <!-- Ещё скидки -->
+          <StackLayout class="more-row" @tap="viewAllCoupons">
+            <GridLayout columns="auto, *, auto" class="more-inner">
+              <Label col="0" text="💎" class="more-gem" />
+              <Label col="1" text="Ещё 12 доступных скидок" class="more-text" textWrap="true" />
+              <Label col="2" text="›" class="more-arrow" />
             </GridLayout>
           </StackLayout>
 
@@ -135,214 +114,263 @@
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'nativescript-vue'
 import { $navigateBack } from 'nativescript-vue'
+import { Utils } from '@nativescript/core'
 
 function goBack() {
   $navigateBack()
+}
+
+// Достижения
+const achievements = ref([
+  {
+    name: 'Ранняя пташка',
+    icon: '🕐',
+    unlocked: true,
+    date: '10 февраля 2026',
+    progress: 100,
+    desc: 'Завершите первое задание до полудня',
+  },
+  {
+    name: 'Творческий ум',
+    icon: '🎨',
+    unlocked: true,
+    date: '18 февраля 2026',
+    progress: 100,
+    desc: 'Начните свой первый творческий челлендж',
+  },
+  {
+    name: 'Шаг к здоровью',
+    icon: '👟',
+    unlocked: false,
+    date: '',
+    progress: 75,
+    desc: 'Пробегите свои первые 10 километров',
+  },
+  {
+    name: 'Языковой эксперт',
+    icon: '🈵',
+    unlocked: false,
+    date: '',
+    progress: 0,
+    desc: 'Проведите 10 часов за изучением языков',
+  },
+])
+
+// Прогресс-бар через columns (надёжно в NativeScript)
+function progressCols(pct: number): string {
+  const safe = Math.max(2, Math.min(98, pct))
+  return `${safe}*, ${100 - safe}*`
+}
+
+// Купоны с URL
+const coupons = ref([
+  {
+    title: 'Скидка 20% в Coffee House',
+    subtitle: 'Действует до 30 июня',
+    colorClass: 'coupon-purple',
+    url: 'https://coffeehouse.ru',
+    claimed: false,
+  },
+  {
+    title: '-15% на спортивные товары',
+    subtitle: 'Для активных пользователей',
+    colorClass: 'coupon-orange',
+    url: 'https://sportmaster.ru',
+    claimed: false,
+  },
+  {
+    title: 'Бесплатный урок рисования',
+    subtitle: 'Для новых участников',
+    colorClass: 'coupon-green',
+    url: 'https://skillbox.ru',
+    claimed: false,
+  },
+])
+
+function claimCoupon(idx: number) {
+  const coupon = coupons.value[idx]
+  if (!coupon.claimed) {
+    // Открываем URL
+    if (coupon.url) {
+      Utils.openUrl(coupon.url)
+    }
+    // Помечаем как полученный
+    coupons.value[idx] = { ...coupon, claimed: true }
+  }
 }
 
 function viewAllAchievements() {
   console.log('View all achievements')
 }
 
-function claimCoupon(id: number) {
-  console.log('Claim coupon', id)
-}
-
 function viewAllCoupons() {
-  console.log('View all coupons')
+  // Например, открыть страницу всех скидок
+  Utils.openUrl('https://hobbyspark.ru/discounts')
 }
 </script>
 
 <style scoped>
-.page {
-  background-color: white;
-}
+.page { background-color: white; }
 
+/* ── Шапка ── */
 .header-section {
   background-color: white;
-  padding: 40px 20px 16px 20px;
+  padding: 40px 18px 16px 18px;
   border-bottom-width: 1px;
   border-bottom-color: #F0F0F0;
 }
-
-.header-content {
-  align-items: center;
-}
-
-.back-button {
-  margin-right: 14px;
-}
-
+.header-content { align-items: center; }
+.back-button { margin-right: 14px; }
 .header-title {
   font-family: 'Nunito', sans-serif;
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 700;
   color: #181820;
 }
 
-.content-scroll {
-  background-color: white;
-}
+.content-scroll { background-color: white; }
+.content-container { padding: 18px 14px 40px 14px; }
 
-.content-container {
-  padding: 20px 16px 40px 16px;
-}
-
-.section-header-row {
-  align-items: center;
-  margin-bottom: 14px;
-}
-
+/* ── Секции ── */
+.section-hdr-row { align-items: center; margin-bottom: 14px; }
 .section-title {
   font-family: 'Nunito', sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: #181820;
 }
-
-.section-title-margin {
-  margin-top: 28px;
-  margin-bottom: 14px;
-}
-
+.section-title-margin { margin-top: 26px; margin-bottom: 14px; }
 .section-link {
   font-family: 'Nunito Sans', sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   color: #8E5EED;
   font-weight: 600;
 }
 
-/* Achievement cards */
-.achievement-card {
+/* ── Карточки достижений ── */
+.ach-card {
+  border-radius: 18px;
+  margin-bottom: 12px;
+  padding: 16px 14px 10px 14px;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
+}
+.ach-unlocked {
   background-color: white;
+  border-width: 1.5px;
+  border-color: #D5C0FB;
+}
+.ach-locked {
+  background-color: #FAFAFA;
   border-width: 1px;
   border-color: #EDEDF2;
-  border-radius: 16px;
-  margin-bottom: 12px;
-  padding: 16px;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.04);
 }
 
-.achievement-unlocked {
-  border-color: #E2D4FB;
-}
+.ach-inner { align-items: center; margin-bottom: 8px; }
 
-.achievement-inner {
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-.achievement-name {
+.ach-name {
   font-family: 'Nunito', sans-serif;
   font-size: 16px;
   font-weight: 700;
-  color: #181820;
-  margin-bottom: 2px;
-}
-
-.achievement-name-progress {
   color: #363645;
+  margin-bottom: 3px;
 }
+.ach-name-done { color: #181820; }
 
-.achievement-date {
+.ach-date {
   font-family: 'Nunito Sans', sans-serif;
-  font-size: 13px;
-  color: #9095A0;
-}
-
-.achievement-progress-label {
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   color: #9095A0;
   margin-bottom: 6px;
 }
 
-.progress-bar-bg {
+.ach-prog-lbl {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 12px;
+  color: #9095A0;
+  margin-bottom: 6px;
+}
+
+/* Прогресс-бар через columns */
+.ach-track {
+  height: 10px;
+  border-radius: 6px;
   background-color: #EDEDF2;
-  border-radius: 4px;
-  height: 8px;
-  width: 180px;
-  margin-top: 4px;
+  overflow: hidden;
+  width: 190px;
+}
+.ach-filled {
+  background: linear-gradient(90deg, #8E5EED, #B07DF8);
+  border-radius: 6px 0 0 6px;
+}
+.ach-empty { background-color: transparent; }
+
+.ach-track-done {
+  height: 10px;
+  border-radius: 6px;
+  background-color: #EDEDF2;
+  overflow: hidden;
+  width: 190px;
+  margin-top: 6px;
+}
+.ach-filled-done {
+  background: linear-gradient(90deg, #8E5EED, #B07DF8);
+  border-radius: 6px;
+  height: 10px;
+  width: 100%;
 }
 
-.progress-bar-fill {
-  background-color: #8E5EED;
-  border-radius: 4px;
-  height: 8px;
-}
-
-.achievement-badge-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: 24px;
+/* Бейдж-иконка */
+.ach-badge {
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
   align-items: center;
   justify-content: center;
 }
+.ach-badge-purple { background-color: #EDE0FF; }
+.ach-badge-gray { background-color: #F3F3F6; }
+.ach-badge-icon { font-size: 24px; text-align: center; }
 
-.achievement-badge-purple {
-  background-color: #EDE0FF;
-}
-
-.achievement-badge-gray {
-  background-color: #F3F3F6;
-}
-
-.achievement-badge-icon {
-  font-size: 22px;
-  text-align: center;
-}
-
-.achievement-desc {
+.ach-desc {
   font-family: 'Nunito Sans', sans-serif;
   font-size: 13px;
   color: #565D6D;
-  margin-top: 4px;
 }
 
-/* Coupon cards */
+/* ── Купоны ── */
 .coupon-card {
   background-color: white;
-  border-width: 1px;
-  border-color: #EDEDF2;
   border-radius: 16px;
   margin-bottom: 12px;
-  padding: 14px 16px;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.04);
+  padding: 14px 14px 10px 14px;
+  box-shadow: 0px 3px 10px rgba(0,0,0,0.07);
+  border-width: 1px;
+  border-color: #EDEDF2;
 }
-
-.coupon-inner {
-  align-items: center;
-}
+.coupon-inner { align-items: center; }
 
 .coupon-icon-wrap {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: 14px;
   align-items: center;
   justify-content: center;
   margin-right: 12px;
 }
-
-.coupon-icon-purple {
-  background-color: #8E5EED;
-}
-
-.coupon-icon-orange {
-  background-color: #FA9938;
-}
+.coupon-purple { background-color: #8E5EED; }
+.coupon-orange { background-color: #FA9938; }
+.coupon-green  { background-color: #3DB87A; }
 
 .coupon-icon {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: white;
   text-align: center;
 }
 
-.coupon-text-wrap {
-  padding-right: 8px;
-}
-
+.coupon-text { padding-right: 8px; }
 .coupon-title {
   font-family: 'Nunito', sans-serif;
   font-size: 15px;
@@ -350,54 +378,66 @@ function viewAllCoupons() {
   color: #181820;
   margin-bottom: 3px;
 }
-
 .coupon-subtitle {
   font-family: 'Nunito Sans', sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   color: #9095A0;
 }
 
-.coupon-button {
+/* Кнопка купона */
+.coupon-btn-wrap {
+  border-radius: 22px;
+  padding: 10px 16px;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+}
+.coupon-btn-active {
   background-color: white;
-  color: #8E5EED;
   border-width: 1.5px;
   border-color: #8E5EED;
-  border-radius: 20px;
+}
+.coupon-btn-claimed {
+  background-color: #3DB87A;
+  border-width: 0;
+}
+.coupon-btn-lbl {
   font-family: 'Nunito Sans', sans-serif;
   font-size: 14px;
   font-weight: 700;
-  height: 64px;
-  padding: 0 16px;
+  color: #8E5EED;
+  text-align: center;
+}
+.coupon-btn-claimed .coupon-btn-lbl {
+  color: white;
 }
 
-.more-coupons-row {
-  background-color: #FAFAFB;
+.coupon-claimed-msg {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 12px;
+  color: #3DB87A;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* ── Ещё скидки ── */
+.more-row {
+  background-color: #F7F4FF;
   border-radius: 16px;
-  padding: 16px;
+  padding: 16px 14px;
   margin-top: 4px;
 }
-
-.more-coupons-inner {
-  align-items: center;
-}
-
-.more-coupons-gem {
-  font-size: 22px;
-  margin-right: 10px;
-}
-
-.more-coupons-text {
+.more-inner { align-items: center; }
+.more-gem { font-size: 22px; margin-right: 10px; }
+.more-text {
   font-family: 'Nunito Sans', sans-serif;
   font-size: 15px;
   color: #363645;
   font-weight: 600;
 }
-
-.more-coupons-link {
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 14px;
+.more-arrow {
+  font-size: 22px;
   color: #8E5EED;
-  font-weight: 600;
-  text-align: right;
+  font-weight: 700;
 }
 </style>
