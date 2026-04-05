@@ -70,7 +70,7 @@
 
           <!-- Empty state -->
           <StackLayout class="empty-state">
-            <Label text="😐" class="empty-icon" />
+            <Image src="res://smailik" class="empty-icon" />
             <Label text="Тут больше ничего нет..." class="empty-text" />
           </StackLayout>
 
@@ -202,9 +202,8 @@ function goBack() {
 }
 
 .empty-icon {
-  font-size: 60px;
-  color: #C0C0CC;
-  text-align: center;
+  width: 600px;
+  height: 600px;
   margin-bottom: 14px;
 }
 

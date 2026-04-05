@@ -296,7 +296,7 @@ function goToNextDay() {
   font-family: 'Nunito Sans', sans-serif;
   font-size: 10px;
   color: #9095A0;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   font-weight: 700;
 }
 .prog-day {
@@ -389,7 +389,7 @@ function goToNextDay() {
   font-size: 17px;
   font-weight: 700;
   border-radius: 50px;
-  height: 110px;
+  height: 140px;
   width: 100%;
   margin-bottom: 12px;
   box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
@@ -401,7 +401,7 @@ function goToNextDay() {
   font-size: 17px;
   font-weight: 700;
   border-radius: 50px;
-  height: 110px;
+  height: 140px;
   width: 100%;
   box-shadow: 0px 4px 14px rgba(250,153,56,0.4);
 }

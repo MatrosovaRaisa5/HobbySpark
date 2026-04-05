@@ -1,18 +1,23 @@
 <template>
   <Page actionBarHidden="true" class="page">
     <GridLayout rows="auto, *, auto">
-
-      <!-- ── Шапка ── -->
-      <GridLayout row="0" columns="auto, *, auto" class="header">
-        <StackLayout col="0" class="logo-wrap">
-          <Label text="✦" class="logo-icon" />
-        </StackLayout>
-        <Label col="1" text="Главная" class="header-title" />
-        <StackLayout col="2" class="bell-wrap" @tap="goToNotifications">
+      <StackLayout row="0" class="header-section">
+        <GridLayout columns="auto, *" class="header-content">
+          <Image
+            col="0"
+            src="res://icon"
+            width="60"
+            height="60"
+            class="app-icon"
+          />
+          <Label col="1" text="Главная" class="header-title" />
+          <StackLayout col="2" class="bell-wrap" @tap="goToNotifications">
           <Label text="🔔" class="bell-icon" />
-          <StackLayout class="bell-badge" />
         </StackLayout>
-      </GridLayout>
+        </GridLayout>
+      </StackLayout>
+
+
 
       <!-- ── Контент ── -->
       <ScrollView row="1" class="scroll">
@@ -75,10 +80,13 @@
             >
               <Image :src="hobby.image" class="rec-img" stretch="aspectFill" />
               <Label :text="hobby.title" class="rec-title" textWrap="true" />
-              <GridLayout columns="auto, auto, auto" class="rec-footer">
-                <Label col="0" text="⭐⭐⭐⭐⭐" class="rec-stars" />
-                <Label col="1" :text="hobby.rating" class="rec-rating" />
-                <Label col="2" text=" NEW" class="rec-new" v-if="hobby.isNew" />
+              <GridLayout columns="auto, *" class="card-difficulty">
+                <Label col="0" text="⭐" class="star-icon" />
+                <Label
+                  col="1"
+                  :text="'Сложность: ' + hobby.difficulty + '/5'"
+                  class="difficulty-text"
+                />
               </GridLayout>
             </StackLayout>
           </GridLayout>
@@ -87,22 +95,42 @@
       </ScrollView>
 
       <!-- ── Таб-бар ── -->
-      <GridLayout row="2" columns="*, *, *, *" class="tabbar">
-        <StackLayout col="0" class="tab tab-active" @tap="goToTab('home')">
+      <GridLayout row="2" columns="*, *, *, *" class="tabbar-menu">
+        <StackLayout
+          col="0"
+          class="tabbar-menu-item"
+          :class="{ selected: currentTab === 'home' }"
+          @tap="goToTab('home')"
+        >
           <Label text="🏠" class="tab-icon" />
-          <Label text="Главная" class="tab-lbl tab-lbl-active" />
+          <Label text="Главная" class="tab-label" />
         </StackLayout>
-        <StackLayout col="1" class="tab" @tap="goToTab('catalog')">
+        <StackLayout
+          col="1"
+          class="tabbar-menu-item"
+          :class="{ selected: currentTab === 'catalog' }"
+          @tap="goToTab('catalog')"
+        >
           <Label text="📚" class="tab-icon" />
-          <Label text="Каталог" class="tab-lbl" />
+          <Label text="Каталог" class="tab-label" />
         </StackLayout>
-        <StackLayout col="2" class="tab" @tap="goToTab('progress')">
+        <StackLayout
+          col="2"
+          class="tabbar-menu-item"
+          :class="{ selected: currentTab === 'progress' }"
+          @tap="goToTab('progress')"
+        >
           <Label text="📈" class="tab-icon" />
-          <Label text="Прогресс" class="tab-lbl" />
+          <Label text="Прогресс" class="tab-label" />
         </StackLayout>
-        <StackLayout col="3" class="tab" @tap="goToTab('profile')">
+        <StackLayout
+          col="3"
+          class="tabbar-menu-item"
+          :class="{ selected: currentTab === 'profile' }"
+          @tap="goToTab('profile')"
+        >
           <Label text="👤" class="tab-icon" />
-          <Label text="Профиль" class="tab-lbl" />
+          <Label text="Профиль" class="tab-label" />
         </StackLayout>
       </GridLayout>
 
@@ -122,7 +150,7 @@ import ChallengeDetail from './ChallengeDetail.vue'
 import ProfilePage from './ProfilePage.vue'
 import ProgressPage from './ProgressPage.vue'
 import DayTaskPage from './DayTaskPage.vue'
-
+const currentTab = ref('home')
 // Имя из настроек профиля (как в ProfilePage)
 const userName = ref(ApplicationSettings.getString('user_name', 'Пользователь'))
 
@@ -192,12 +220,18 @@ function goToTab(tab: string) {
 <style scoped>
 .page { background-color: #F8F6FF; }
 
-/* ── Шапка ── */
-.header {
+.header-section {
   background-color: white;
-  padding: 48px 20px 14px 20px;
+  padding: 30px 20px 10px 20px;
+}
+
+.header-content {
   align-items: center;
-  box-shadow: 0px 2px 6px rgba(0,0,0,0.06);
+  margin-bottom: 10px;
+}
+
+.app-icon {
+  margin-right: 8px;
 }
 
 .logo-wrap {
@@ -218,27 +252,27 @@ function goToTab(tab: string) {
 
 .header-title {
   font-family: 'Nunito', sans-serif;
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 24px;
+  font-weight: 700;
   color: #181820;
 }
 
 .bell-wrap {
-  width: 44px;
-  height: 44px;
+  width: 90px;
+  height: 90px;
   border-radius: 22px;
   background-color: #F3F3F6;
   align-items: center;
   justify-content: center;
-  margin-left: 8px;
+  margin-left: 750px;
 }
-.bell-icon { font-size: 20px; text-align: center; }
+.bell-icon { font-size: 22px; text-align: center; }
 .bell-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 9px;
-  height: 9px;
+  top: 10px;
+  left: 0px;
+  width: 20px;
+  height: 29px;
   border-radius: 5px;
   background-color: #8E5EED;
 }
@@ -274,7 +308,7 @@ function goToTab(tab: string) {
   font-size: 11px;
   font-weight: 700;
   color: rgba(255,255,255,0.75);
-  letter-spacing: 1.2px;
+  letter-spacing: 0.2px;
   margin-bottom: 6px;
 }
 .challenge-title {
@@ -283,9 +317,25 @@ function goToTab(tab: string) {
   font-weight: 800;
   color: white;
 }
+.card-difficulty {
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.star-icon {
+  font-size: 14px;
+  color: #FA9938;
+  margin-right: 4px;
+}
+
+.difficulty-text {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 12px;
+  color: #363645;
+}
 .challenge-icon-wrap {
-  width: 54px;
-  height: 54px;
+  width: 100px;
+  height: 100px;
   border-radius: 27px;
   background-color: rgba(255,200,100,0.3);
   align-items: center;
@@ -294,7 +344,7 @@ function goToTab(tab: string) {
   align-self: flex-start;
   margin-top: 4px;
 }
-.challenge-icon-emoji { font-size: 28px; text-align: center; }
+.challenge-icon-emoji { font-size: 25px; text-align: center; }
 
 .progress-meta {
   align-items: center;
@@ -326,8 +376,8 @@ function goToTab(tab: string) {
 
 .progress-start-tag {
   font-family: 'Nunito Sans', sans-serif;
-  font-size: 11px;
-  color: rgba(255,255,255,0.65);
+  font-size: 13px;
+  color: rgba(255,255,255,0.85);
   margin-bottom: 10px;
 }
 
@@ -336,7 +386,7 @@ function goToTab(tab: string) {
   height: 8px;
   border-radius: 4px;
   background-color: rgba(255,255,255,0.3);
-  margin: 0 2px;
+  margin: 0 10px;
 }
 .dot-active { background-color: white; }
 
@@ -347,7 +397,7 @@ function goToTab(tab: string) {
   font-size: 16px;
   font-weight: 700;
   border-radius: 50px;
-  height: 52px;
+  height: 140px;
   width: 100%;
 }
 
@@ -373,12 +423,12 @@ function goToTab(tab: string) {
   border-radius: 20px;
   margin: 8px 6px;
   padding-bottom: 12px;
-  box-shadow: 0px 4px 12px rgba(0,0,0,0.09);
+  box-shadow: 0px 6px 9px rgba(0,0,0,0.09);
   overflow: hidden;
 }
 .rec-img {
   width: 100%;
-  height: 160px;
+  height: 300px;
   border-radius: 20px 20px 0 0;
 }
 .rec-title {
@@ -404,30 +454,40 @@ function goToTab(tab: string) {
 }
 
 /* ── Таб-бар ── */
-.tabbar {
+.tabbar-menu {
   background-color: white;
   border-top-width: 1px;
-  border-top-color: #EDEDF2;
-  height: 80px;
-  padding-bottom: 8px;
+  border-top-color: #E0E0E6;
+  height: 170px;
+  align-items: center;
 }
-.tab {
+
+.tabbar-menu-item {
   align-items: center;
   justify-content: center;
-  padding: 8px 4px;
-}
-.tab-active {
-  background-color: #EDE0FF;
-  border-radius: 14px;
-  margin: 4px;
-}
-.tab-icon { font-size: 22px; text-align: center; }
-.tab-lbl {
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 11px;
+  padding: 8px 0;
   color: #565D6D;
+}
+
+.tabbar-menu-item.selected {
+  color: #8E5EED;
+  font-weight: 700;
+  background-color: #DBCCF9;
+}
+
+.tab-icon,
+.tab-label {
   text-align: center;
+  horizontal-align: center;
+}
+
+.tab-icon {
+  font-size: 20px;
+}
+
+.tab-label {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 10px;
   margin-top: 2px;
 }
-.tab-lbl-active { color: #8E5EED; font-weight: 700; }
 </style>
