@@ -1,7 +1,7 @@
 import { Http } from '@nativescript/core';
 import { ApplicationSettings } from '@nativescript/core';
 
-const BASE_URL = 'http://192.168.1.207:8080';
+const BASE_URL = 'http://10.88.211.11:8080';
 
 export const api = {
   async request(endpoint: string, method: string, body?: any, needAuth = true) {

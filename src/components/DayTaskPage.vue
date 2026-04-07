@@ -1,6 +1,7 @@
 <template>
   <Page actionBarHidden="true" class="page">
     <GridLayout rows="auto, *">
+
       <!-- Header -->
       <StackLayout row="0" class="header-section">
         <GridLayout columns="auto, *" class="header-content">
@@ -11,6 +12,7 @@
 
       <ScrollView row="1" class="content-scroll">
         <StackLayout>
+
           <!-- Intro -->
           <StackLayout class="intro-block" v-if="task">
             <Label :text="task.intro" class="intro-text" textWrap="true" />
@@ -29,20 +31,20 @@
               <Label col="1" :text="materialsOpen ? '▲' : '▼'" class="accordion-arrow" />
             </GridLayout>
             <StackLayout v-if="materialsOpen">
-              <!-- Каждый материал теперь в двухстрочном макете -->
               <StackLayout
                 v-for="(item, idx) in materialsList"
                 :key="'mat-' + idx"
                 class="material-row"
                 @tap="toggleCheck(idx)"
               >
-                <GridLayout columns="auto, *" class="material-inner">
+                <GridLayout columns="auto, auto, *" class="material-inner">
                   <StackLayout col="0" class="checkbox-wrap" :class="item.checked ? 'checked' : ''">
                     <Label v-if="item.checked" text="✓" class="checkbox-tick" />
                   </StackLayout>
-                  <Label col="1" :text="item.emoji + '  ' + item.name" class="material-name" />
+                  <!-- Emoji отдельным Label для правильного рендера -->
+                  <Label col="1" :text="item.emoji" class="material-emoji" />
+                  <Label col="2" :text="item.name" class="material-name" />
                 </GridLayout>
-                <!-- Подсказка теперь под названием, а не справа -->
                 <Label :text="item.hint" class="material-hint" textWrap="true" v-if="item.hint" />
               </StackLayout>
               <StackLayout class="tip-box">
@@ -73,7 +75,7 @@
           <!-- Советы дня -->
           <StackLayout class="tips-section" v-if="task && task.tips.length > 0">
             <GridLayout columns="auto, *" class="tips-header-row">
-              <Label col="0" text="🤔" class="tips-emoji" />
+              <Label col="0" text="🤔" class="section-emoji" />
               <Label col="1" text="Советы дня" class="tips-title" />
             </GridLayout>
             <StackLayout v-for="(tip, idx) in task.tips" :key="'tip-' + idx" class="tip-card">
@@ -82,40 +84,99 @@
             </StackLayout>
           </StackLayout>
 
-          <!-- Вопросы + настроение + заметка -->
+          <!-- Галерея участников -->
+          <StackLayout
+            class="gallery-section"
+            v-if="task && task.gallery && task.gallery.length > 0"
+          >
+            <GridLayout columns="auto, *" class="gallery-header-row">
+              <Label col="0" text="🖼" class="section-emoji" />
+              <Label col="1" text="Работы участников" class="gallery-title" />
+            </GridLayout>
+            <ScrollView orientation="horizontal" scrollBarIndicatorVisible="false">
+              <StackLayout orientation="horizontal" class="gallery-scroll-inner">
+                <StackLayout
+                  v-for="(item, idx) in task.gallery"
+                  :key="'gal-' + idx"
+                  class="gallery-card"
+                >
+                  <Image :src="item.image" class="gallery-img" stretch="aspectFill" />
+                  <Label
+                    v-if="item.author"
+                    :text="item.author"
+                    class="gallery-author"
+                  />
+                </StackLayout>
+              </StackLayout>
+            </ScrollView>
+          </StackLayout>
+
+          <!-- Вопросы + настроение + заметка + фото -->
           <StackLayout class="white-block questions-block" v-if="task">
             <GridLayout columns="auto, *" class="questions-header-row">
-              <Label col="0" text="❓" class="questions-emoji" />
+              <Label col="0" text="❓" class="section-emoji" />
               <Label col="1" text="Вопросы дня" class="questions-title" />
             </GridLayout>
             <StackLayout v-for="(q, idx) in task.questions" :key="'q-' + idx" class="question-pill">
               <Label :text="q" class="question-text" textWrap="true" />
             </StackLayout>
 
-            <Label text="Как бы ты оценила своё настроение после задания?" class="mood-question" textWrap="true" />
-            
-            <!-- Используем WrapLayout для эмодзи с переносом строк -->
-            <WrapLayout class="mood-wrap" :itemWidth="48" :itemHeight="48">
+            <Label text="Как бы ты оценил своё настроение после задания?" class="mood-question" textWrap="true" />
+
+            <!-- Настроение — смайлики в WrapLayout -->
+            <WrapLayout class="mood-wrap">
               <StackLayout
                 v-for="(emoji, idx) in moodEmojis"
                 :key="'mood-' + idx"
                 :class="['mood-emoji-wrap', selectedMood === idx ? 'mood-selected' : '']"
                 @tap="selectMood(idx)"
+                width="52" height="52"
               >
-                <Label :text="emoji" class="mood-emoji" />
+                <!-- Emoji в отдельном Label без лишних шрифтов -->
+                <Label :text="emoji" class="mood-emoji" verticalAlignment="center" horizontalAlignment="center" />
               </StackLayout>
             </WrapLayout>
 
+            <!-- Заметка -->
             <GridLayout columns="*, auto" class="note-header-row">
               <Label col="0" text="Заметка" class="note-label" />
               <Label col="1" text="✏️" class="note-edit-icon" />
             </GridLayout>
             <StackLayout class="note-input-wrap">
-              <TextField hint="Как прошёл ваш день? Добавьте пару слов..." class="note-input" v-model="noteText" returnKeyType="done" />
+              <TextView
+                hint="Как прошёл ваш день? Добавьте пару слов..."
+                class="note-input"
+                v-model="noteText"
+                returnKeyType="done"
+              />
             </StackLayout>
+
+            <!-- Прикрепить фото -->
+            <Label text="Фото результата" class="photo-label" />
+            <StackLayout class="photo-attach-area" @tap="pickPhoto">
+              <!-- Если фото уже выбрано — показываем превью -->
+              <Image
+                v-if="attachedPhoto"
+                :src="attachedPhoto"
+                class="photo-preview"
+                stretch="aspectFill"
+              />
+              <!-- Иначе — кнопка-заглушка -->
+              <StackLayout v-else class="photo-placeholder">
+                <Label text="📷" class="photo-placeholder-icon" horizontalAlignment="center" />
+                <Label text="Прикрепить фото" class="photo-placeholder-text" horizontalAlignment="center" />
+              </StackLayout>
+            </StackLayout>
+            <Label
+              v-if="attachedPhoto"
+              text="✕  Удалить фото"
+              class="photo-remove-btn"
+              @tap="removePhoto"
+            />
 
             <Button text="✓  Завершить день" class="complete-button" @tap="completeDay" />
           </StackLayout>
+
         </StackLayout>
       </ScrollView>
     </GridLayout>
@@ -127,6 +188,8 @@ import { ref } from 'nativescript-vue'
 import { $navigateBack, $navigateTo } from 'nativescript-vue'
 import { getDayTask } from '~/data/dayTasksData'
 import TaskCompletedPage from './TaskCompletedPage.vue'
+// Для выбора фото из галереи устройства
+import { ImagePicker, ImagePickerMediaType } from '@nativescript/imagepicker'
 
 const props = defineProps<{
   challengeId: number
@@ -139,7 +202,6 @@ const task = getDayTask(props.challengeId, props.day)
 const materialsList = ref(
   (task?.materials ?? []).map(m => ({ ...m, checked: false }))
 )
-
 function toggleCheck(idx: number) {
   const item = materialsList.value[idx]
   if (item) item.checked = !item.checked
@@ -150,13 +212,40 @@ function toggleMaterials() {
   materialsOpen.value = !materialsOpen.value
 }
 
-const moodEmojis = ['😠', '😵', '😢', '😐', '😊', '😃', '🤩', '😇', '🥰']
+// Настроение
+const moodEmojis = ['😠', '😵', '😢', '😐', '😊', '😃', '🤩', '😇', '🥰', '🫣', '☠️', '😶‍🌫️']
 const selectedMood = ref<number | null>(null)
 function selectMood(idx: number) {
   selectedMood.value = idx
 }
 
+// Заметка
 const noteText = ref('')
+
+// Прикреплённое фото
+const attachedPhoto = ref<string | null>(null)
+
+async function pickPhoto() {
+  try {
+    const picker = new ImagePicker({
+      mode: 'single',
+      mediaType: ImagePickerMediaType.Image,
+    })
+    await picker.authorize()
+    const selection = await picker.present()
+    if (selection && selection.length > 0) {
+      const selected = selection[0]
+      await selected.getImageAsync()
+      attachedPhoto.value = selected.fileUri ?? selected.uri
+    }
+  } catch (e) {
+    console.error('Ошибка выбора фото:', e)
+  }
+}
+
+function removePhoto() {
+  attachedPhoto.value = null
+}
 
 function goBack() { $navigateBack() }
 
@@ -173,29 +262,29 @@ function completeDay() {
 <style scoped>
 .page { background-color: #F3EEF9; }
 
+/* ── Header ─────────────────────────────────────────────────────────────── */
 .header-section {
   background-color: white;
   padding: 20px 20px 10px 20px;
   border-bottom-width: 1px;
   border-bottom-color: #F0F0F0;
 }
-
 .header-content { align-items: center; }
-
 .back-button { margin-right: 17px; }
+.header-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #181820;
+  margin-top: 27px;
+  margin-left: 20px;
+  margin-bottom: 40px;
+}
 
-  .header-title {
-    font-family: 'Nunito', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    color: #181820;
-    margin-top: 27px;
-    margin-left: 20px;
-    margin-bottom: 40px;
-  }
-
+/* ── Scroll ──────────────────────────────────────────────────────────────── */
 .content-scroll { background-color: #F3EEF9; }
 
+/* ── Intro ───────────────────────────────────────────────────────────────── */
 .intro-block {
   background-color: #E9DCFB;
   padding: 20px 20px;
@@ -208,6 +297,7 @@ function completeDay() {
   line-height: 12px;
 }
 
+/* ── Белый блок ──────────────────────────────────────────────────────────── */
 .white-block {
   background-color: white;
   border-radius: 20px;
@@ -216,6 +306,7 @@ function completeDay() {
   box-shadow: 0px 2px 8px rgba(0,0,0,0.06);
 }
 
+/* ── Аккордеон материалов ────────────────────────────────────────────────── */
 .accordion-header {
   align-items: center;
   padding-bottom: 12px;
@@ -231,20 +322,17 @@ function completeDay() {
 }
 .accordion-arrow { font-size: 14px; color: #8E5EED; }
 
-/* Новый стиль для материалов (чеклист) */
+/* ── Материалы ───────────────────────────────────────────────────────────── */
 .material-row {
   padding: 12px 0;
   border-bottom-width: 1px;
   border-bottom-color: #F5F5F8;
 }
-.material-inner {
-  align-items: center;
-  margin-bottom: 6px;
-}
+.material-inner { align-items: center; margin-bottom: 6px; }
 .checkbox-wrap {
   width: 50px;
   height: 50px;
-  border-radius: 6px;
+  border-radius: 8px;
   border-width: 2px;
   border-color: #D0D5DD;
   align-items: center;
@@ -261,6 +349,13 @@ function completeDay() {
   text-align: center;
   font-weight: 800;
 }
+/* Emoji материала — отдельный Label, чтобы не конфликтовать с шрифтом текста */
+.material-emoji {
+  font-size: 22px;
+  width: 100px;
+  text-align: center;
+  margin-right: 8px;
+}
 .material-name {
   font-family: 'Nunito', sans-serif;
   font-size: 15px;
@@ -272,10 +367,11 @@ function completeDay() {
   font-size: 13px;
   color: #565D6D;
   line-height: 10px;
-  margin-left: 36px; /* отступ под чекбокс */
+  margin-left: 76px;
   margin-top: 4px;
 }
 
+/* ── Подсказка внизу чеклиста ────────────────────────────────────────────── */
 .tip-box {
   background-color: #FFF7ED;
   border-radius: 12px;
@@ -290,6 +386,7 @@ function completeDay() {
   line-height: 12px;
 }
 
+/* ── Шаги ────────────────────────────────────────────────────────────────── */
 .step-block { padding: 18px 16px 0 16px; }
 .step-header { align-items: center; margin-bottom: 10px; }
 .step-number-wrap {
@@ -325,9 +422,11 @@ function completeDay() {
 .step-image {
   width: 100%;
   height: 650px;
-  border-radius: 16 16 16px 16px;
+  border-radius: 16px;
+  margin-bottom: 4px;
 }
 
+/* ── Советы дня ──────────────────────────────────────────────────────────── */
 .tips-section {
   background-color: #EDE0FF;
   border-radius: 20px;
@@ -335,7 +434,6 @@ function completeDay() {
   padding: 18px 16px;
 }
 .tips-header-row { align-items: center; margin-bottom: 14px; }
-.tips-emoji { font-size: 26px; margin-right: 10px; }
 .tips-title {
   font-family: 'Nunito', sans-serif;
   font-size: 18px;
@@ -363,9 +461,46 @@ function completeDay() {
   line-height: 12px;
 }
 
+/* ── Галерея участников ──────────────────────────────────────────────────── */
+.gallery-section {
+  background-color: white;
+  border-radius: 20px;
+  margin: 12px 14px;
+  padding: 18px 16px;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.06);
+}
+.gallery-header-row { align-items: center; margin-bottom: 14px; }
+.gallery-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #181820;
+}
+.gallery-scroll-inner { padding: 4px 0 8px 0; }
+.gallery-card {
+  width: 650px;
+  margin-right: 12px;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: #F3EEF9;
+}
+.gallery-img {
+  width: 650px;
+  height: 650px;
+  border-radius: 16px;
+}
+.gallery-author {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #8E5EED;
+  text-align: center;
+  padding: 6px 4px;
+}
+
+/* ── Вопросы ─────────────────────────────────────────────────────────────── */
 .questions-block { margin-bottom: 24px; }
 .questions-header-row { align-items: center; margin-bottom: 14px; }
-.questions-emoji { font-size: 26px; margin-right: 10px; }
 .questions-title {
   font-family: 'Nunito', sans-serif;
   font-size: 18px;
@@ -385,6 +520,17 @@ function completeDay() {
   line-height: 20px;
 }
 
+/* ── Общий стиль emoji-иконок секций ────────────────────────────────────── */
+.section-emoji {
+  font-size: 24px;
+  width: 36px;
+  height: 36px;
+  text-align: center;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+/* ── Настроение ──────────────────────────────────────────────────────────── */
 .mood-question {
   font-family: 'Nunito', sans-serif;
   font-size: 15px;
@@ -393,15 +539,12 @@ function completeDay() {
   margin-top: 16px;
   margin-bottom: 12px;
 }
-/* WrapLayout для эмодзи */
 .mood-wrap {
   margin-bottom: 16px;
   margin-top: 4px;
 }
 .mood-emoji-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: 24px;
+  border-radius: 26px;
   align-items: center;
   justify-content: center;
   background-color: #EDE0FF;
@@ -410,11 +553,16 @@ function completeDay() {
 .mood-emoji-wrap.mood-selected {
   background-color: #8E5EED;
 }
+/* Emoji настроения: отдельный Label без привязки к шрифту текста */
 .mood-emoji {
-  font-size: 26px;
+  font-size: 28px;
+  width: 100px;
+  height:100px;
   text-align: center;
+  vertical-align: middle;
 }
 
+/* ── Заметка ─────────────────────────────────────────────────────────────── */
 .note-header-row { align-items: center; margin-bottom: 8px; margin-top: 4px; }
 .note-label {
   font-family: 'Nunito', sans-serif;
@@ -435,9 +583,53 @@ function completeDay() {
   color: #363645;
   background-color: transparent;
   placeholder-color: #9095A0;
-  min-height: 120px;
+  min-height: 80px;
 }
 
+/* ── Прикрепить фото ─────────────────────────────────────────────────────── */
+.photo-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #181820;
+  margin-bottom: 10px;
+}
+.photo-attach-area {
+  border-radius: 16px;
+  border-width: 2px;
+  border-color: #D8C7F8;
+  border-style: dashed;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.photo-placeholder {
+  padding: 28px 0;
+  background-color: #F8F4FF;
+  align-items: center;
+}
+.photo-placeholder-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+.photo-placeholder-text {
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #8E5EED;
+}
+.photo-preview {
+  width: 100%;
+  height: 220px;
+}
+.photo-remove-btn {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  color: #E5534B;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* ── Завершить день ──────────────────────────────────────────────────────── */
 .complete-button {
   background-color: #8E5EED;
   color: white;
@@ -447,9 +639,11 @@ function completeDay() {
   border-radius: 50px;
   height: 140px;
   width: 100%;
+  margin-top: 8px;
   box-shadow: 0px 4px 12px rgba(142,94,237,0.35);
 }
 
+/* ── Нет данных ──────────────────────────────────────────────────────────── */
 .no-data-block { align-items: center; padding: 60px 20px; }
 .no-data-emoji { font-size: 48px; text-align: center; margin-bottom: 12px; }
 .no-data-text {
