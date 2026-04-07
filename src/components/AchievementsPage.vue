@@ -11,7 +11,7 @@
       <ScrollView row="1" class="content-scroll">
         <StackLayout class="content-container">
 
-          <!-- ── Достижения ── -->
+
           <GridLayout columns="*, auto" class="section-hdr-row">
             <Label col="0" text="Мои достижения" class="section-title" />
             <Label col="1" text="Посмотреть все" class="section-link" @tap="viewAllAchievements" />
@@ -24,17 +24,13 @@
           >
             <GridLayout columns="*, auto" class="ach-inner">
               <StackLayout col="0">
-                <!-- Название -->
+
                 <Label :text="ach.name" :class="['ach-name', ach.unlocked ? 'ach-name-done' : '']" />
 
-                <!-- Получено / в прогрессе -->
                 <Label v-if="ach.unlocked" :text="'Получено: ' + ach.date" class="ach-date" />
                 <Label v-else :text="'Прогресс: ' + ach.progress + '/100'" class="ach-prog-lbl" />
 
-                <!--
-                  ПРОГРЕСС-БАР через GridLayout columns
-                  Работает надёжно в NativeScript в отличие от width: x%
-                -->
+
                 <GridLayout
                   v-if="!ach.unlocked"
                   :columns="progressCols(ach.progress)"
@@ -56,11 +52,9 @@
               </StackLayout>
             </GridLayout>
 
-            <!-- Описание -->
             <Label :text="ach.desc" class="ach-desc" textWrap="true" />
           </StackLayout>
 
-          <!-- ── Купоны ── -->
           <Label text="Купоны и скидки от спонсоров" class="section-title section-title-margin" />
 
           <StackLayout
@@ -69,22 +63,18 @@
             class="coupon-card"
           >
             <GridLayout columns="auto, *, auto" class="coupon-inner">
-              <!-- Иконка -->
+        
               <StackLayout col="0" :class="['coupon-icon-wrap', coupon.colorClass]">
                 <Label text="%" class="coupon-icon" />
               </StackLayout>
 
-              <!-- Текст -->
+         
               <StackLayout col="1" class="coupon-text">
                 <Label :text="coupon.title" class="coupon-title" textWrap="true" />
                 <Label :text="coupon.subtitle" class="coupon-subtitle" />
               </StackLayout>
 
-              <!--
-                Кнопка "Забрать":
-                - открывает URL если задан
-                - анимирует нажатие (меняет цвет на зелёный)
-              -->
+       
               <StackLayout
                 col="2"
                 :class="['coupon-btn-wrap', coupon.claimed ? 'coupon-btn-claimed' : 'coupon-btn-active']"
@@ -94,11 +84,11 @@
               </StackLayout>
             </GridLayout>
 
-            <!-- Срок действия / статус -->
+   
             <Label v-if="coupon.claimed" text="Купон активирован ✓" class="coupon-claimed-msg" />
           </StackLayout>
 
-          <!-- Ещё скидки -->
+   
           <StackLayout class="more-row" @tap="viewAllCoupons">
             <GridLayout columns="auto, *, auto" class="more-inner">
               <Label col="0" text="💎" class="more-gem" />
@@ -192,11 +182,11 @@ const coupons = ref([
 function claimCoupon(idx: number) {
   const coupon = coupons.value[idx]
   if (!coupon.claimed) {
-    // Открываем URL
+  
     if (coupon.url) {
       Utils.openUrl(coupon.url)
     }
-    // Помечаем как полученный
+ 
     coupons.value[idx] = { ...coupon, claimed: true }
   }
 }
@@ -206,7 +196,6 @@ function viewAllAchievements() {
 }
 
 function viewAllCoupons() {
-  // Например, открыть страницу всех скидок
   Utils.openUrl('https://hobbyspark.ru/discounts')
 }
 </script>
@@ -214,7 +203,6 @@ function viewAllCoupons() {
 <style scoped>
 .page { background-color: white; }
 
-/* ── Шапка ── */
 .header-section {
   background-color: white;
   padding: 40px 18px 16px 18px;
@@ -249,7 +237,6 @@ function viewAllCoupons() {
   font-weight: 600;
 }
 
-/* ── Карточки достижений ── */
 .ach-card {
   border-radius: 18px;
   margin-bottom: 12px;
@@ -292,7 +279,6 @@ function viewAllCoupons() {
   margin-bottom: 6px;
 }
 
-/* Прогресс-бар через columns */
 .ach-track {
   height: 10px;
   border-radius: 6px;
@@ -321,7 +307,6 @@ function viewAllCoupons() {
   width: 100%;
 }
 
-/* Бейдж-иконка */
 .ach-badge {
   width: 50px;
   height: 50px;
@@ -339,7 +324,6 @@ function viewAllCoupons() {
   color: #565D6D;
 }
 
-/* ── Купоны ── */
 .coupon-card {
   background-color: white;
   border-radius: 16px;
@@ -384,7 +368,6 @@ function viewAllCoupons() {
   color: #9095A0;
 }
 
-/* Кнопка купона */
 .coupon-btn-wrap {
   border-radius: 22px;
   padding: 10px 16px;
@@ -420,7 +403,6 @@ function viewAllCoupons() {
   font-weight: 600;
 }
 
-/* ── Ещё скидки ── */
 .more-row {
   background-color: #F7F4FF;
   border-radius: 16px;

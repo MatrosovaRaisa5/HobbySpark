@@ -2,46 +2,35 @@
   <Page actionBarHidden="true" class="page">
     <GridLayout rows="auto, *, auto">
       <StackLayout row="0" class="header-section">
-        <GridLayout columns="auto, *" class="header-content">
-          <Image
-            col="0"
-            src="res://icon"
-            width="60"
-            height="60"
-            class="app-icon"
-          />
+        <GridLayout columns="auto, *, auto" class="header-content">
+          <Image col="0" src="res://icon" width="60" height="60" class="app-icon" />
           <Label col="1" text="Главная" class="header-title" />
           <StackLayout col="2" class="bell-wrap" @tap="goToNotifications">
-          <Label text="🔔" class="bell-icon" />
-        </StackLayout>
+            <Image src="res://kolokol" width="100" height="100" stretch="aspectFit" />
+          </StackLayout>
         </GridLayout>
       </StackLayout>
 
-
-
-      <!-- ── Контент ── -->
       <ScrollView row="1" class="scroll">
         <StackLayout class="content">
-
-          <!-- Приветствие -->
           <Label :text="'Привет, ' + userName + '!'" class="greeting" />
           <Label text="Твоё вдохновение на сегодня здесь ✨" class="subgreeting" />
 
-          <!-- ── Карточка текущего челленджа ── -->
-          <StackLayout class="challenge-card">
+          <StackLayout class="challenge-card" v-if="currentChallengeData">
             <GridLayout columns="*, auto">
               <StackLayout col="0">
                 <Label text="ТЕКУЩИЙ ЧЕЛЛЕНДЖ" class="challenge-label" />
-                <Label :text="currentChallenge.title" class="challenge-title" textWrap="true" />
+                <Label :text="currentChallengeData.title" class="challenge-title" textWrap="true" />
               </StackLayout>
               <StackLayout col="1" class="challenge-icon-wrap">
-                <Label text="🎨" class="challenge-icon-emoji" />
+                <!-- Эмодзи можно взять из данных, если есть, или оставить статичным -->
+                <Label text="💫" class="challenge-icon-emoji" />
               </StackLayout>
             </GridLayout>
 
             <GridLayout columns="*, auto" class="progress-meta">
               <Label col="0" text="Прогресс" class="meta-left" />
-              <Label col="1" :text="'День ' + currentChallenge.currentDay + ' из ' + currentChallenge.totalDays" class="meta-right" />
+              <Label col="1" :text="'День ' + currentDay + ' из ' + totalDays" class="meta-right" />
             </GridLayout>
 
             <GridLayout :columns="progressCols" class="progress-track">
@@ -53,17 +42,20 @@
 
             <GridLayout columns="*, *, *, *, *, *, *" class="dots-row">
               <StackLayout
-                v-for="d in currentChallenge.totalDays"
+                v-for="d in totalDays"
                 :key="d"
                 :col="d - 1"
-                :class="['dot', d <= currentChallenge.currentDay ? 'dot-active' : '']"
+                :class="['dot', d <= currentDay ? 'dot-active' : '']"
               />
             </GridLayout>
 
-            <Button text="Продолжить обучение" class="challenge-btn" @tap="goToCurrentChallenge" />
+            <Button
+              :text="machineState === 'completed' ? 'Челлендж завершён 🎉' : 'Продолжить обучение'"
+              class="challenge-btn"
+              @tap="goToCurrentChallenge"
+            />
           </StackLayout>
 
-          <!-- ── Рекомендуем вам ── -->
           <GridLayout columns="*, auto" class="section-hdr">
             <Label col="0" text="Рекомендуем вам" class="section-title" />
             <Label col="1" text="Все" class="section-link" @tap="goToCatalog" />
@@ -82,11 +74,7 @@
               <Label :text="hobby.title" class="rec-title" textWrap="true" />
               <GridLayout columns="auto, *" class="card-difficulty">
                 <Label col="0" text="⭐" class="star-icon" />
-                <Label
-                  col="1"
-                  :text="'Сложность: ' + hobby.difficulty + '/5'"
-                  class="difficulty-text"
-                />
+                <Label col="1" :text="'Сложность: ' + hobby.difficulty + '/5'" class="difficulty-text" />
               </GridLayout>
             </StackLayout>
           </GridLayout>
@@ -138,36 +126,60 @@
   </Page>
 </template>
 
+
 <script lang="ts" setup>
 import { Frame } from '@nativescript/core'
 import { computed, ref, onMounted } from 'nativescript-vue'
 import { $navigateTo } from 'nativescript-vue'
 import { ApplicationSettings } from '@nativescript/core'
 import { hobbiesData } from '~/data/hobbies'
+import {
+  challengeService,
+  getCurrentDay,
+  getTotalDays,
+  getChallengeId,
+  getMachineState,
+  startChallenge,
+} from '~/machines/challengeMachine'
+import { challengesData } from '~/data/challengesData'
 import NotificationsPage from './NotificationsPage.vue'
 import CatalogPage from './CatalogPage.vue'
 import ChallengeDetail from './ChallengeDetail.vue'
 import ProfilePage from './ProfilePage.vue'
 import ProgressPage from './ProgressPage.vue'
 import DayTaskPage from './DayTaskPage.vue'
+
 const currentTab = ref('home')
-// Имя из настроек профиля (как в ProfilePage)
-const userName = ref(ApplicationSettings.getString('user_name', 'Пользователь'))
+const userName   = ref(ApplicationSettings.getString('user_name', 'Пользователь'))
+
+const currentDay   = ref(getCurrentDay())
+const totalDays    = ref(getTotalDays())
+const machineState = ref(getMachineState())
+const challengeId  = ref(getChallengeId())
+
+
+const currentChallengeData = computed(() => {
+  return challengesData.find(c => c.id === challengeId.value) || challengesData[0]
+})
+
+challengeService.onTransition((state) => {
+  currentDay.value   = state.context.currentDay
+  totalDays.value    = state.context.totalDays
+  machineState.value = state.value as string
+  challengeId.value  = state.context.challengeId
+})
 
 onMounted(() => {
   const saved = ApplicationSettings.getString('user_name')
   if (saved) userName.value = saved
+  currentDay.value   = getCurrentDay()
+  totalDays.value    = getTotalDays()
+  machineState.value = getMachineState()
+  challengeId.value  = getChallengeId()
 })
 
-const currentChallenge = {
-  id: 1,
-  title: 'Твоя искра в акварели',
-  currentDay: 1,
-  totalDays: 7,
-}
-
 const progressCols = computed(() => {
-  const pct = Math.max(2, (currentChallenge.currentDay / currentChallenge.totalDays) * 100)
+  const pct = Math.max(2, (currentDay.value / totalDays.value) * 100)
   return `${pct}*, ${100 - pct}*`
 })
 
@@ -177,7 +189,6 @@ const recommendedHobbies = hobbiesData.slice(0, 4).map((h, i) => ({
   rating: ratings[i] ?? '4.5',
   isNew: i === 0,
 }))
-
 const recsRows = computed(() => {
   const rows = Math.ceil(recommendedHobbies.length / 2)
   return Array(rows).fill('auto').join(',')
@@ -188,14 +199,20 @@ function goToNotifications() {
 }
 
 function goToCurrentChallenge() {
+  if (machineState.value === 'completed') return
+
+  if (machineState.value === 'idle' && currentChallengeData.value) {
+    startChallenge(currentChallengeData.value.id, currentChallengeData.value.weeklyProgram.length)
+  }
   $navigateTo(DayTaskPage, {
-    props: { challengeId: currentChallenge.id, day: currentChallenge.currentDay },
+    props: {
+      challengeId: getChallengeId(),
+      day: getCurrentDay(),
+    },
   })
 }
 
-function goToCatalog() {
-  $navigateTo(CatalogPage)
-}
+function goToCatalog() { $navigateTo(CatalogPage) }
 
 function openHobby(id: number) {
   $navigateTo(ChallengeDetail, { props: { challengeId: id } })
@@ -209,7 +226,6 @@ function goToTab(tab: string) {
   } else if (tab === 'profile') {
     $navigateTo(ProfilePage)
   } else if (tab === 'home') {
-    // Возвращаемся на главную, закрывая все страницы над ней
     while (Frame.topmost().canGoBack()) {
       Frame.topmost().goBack()
     }
@@ -258,24 +274,14 @@ function goToTab(tab: string) {
 }
 
 .bell-wrap {
-  width: 90px;
-  height: 90px;
-  border-radius: 22px;
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
   background-color: #F3F3F6;
   align-items: center;
   justify-content: center;
-  margin-left: 750px;
 }
-.bell-icon { font-size: 22px; text-align: center; }
-.bell-badge {
-  position: absolute;
-  top: 10px;
-  left: 0px;
-  width: 20px;
-  height: 29px;
-  border-radius: 5px;
-  background-color: #8E5EED;
-}
+.bell-icon { font-size: 35px; text-align: center; }
 
 /* ── Контент ── */
 .scroll { background-color: #F8F6FF; }

@@ -2,7 +2,6 @@
   <Page actionBarHidden="true" class="page">
     <GridLayout rows="auto, *">
 
-      <!-- Header -->
       <StackLayout row="0" class="header-section">
         <GridLayout columns="auto, *" class="header-content">
           <Image col="0" src="res://back" width="27" height="27" class="back-button" @tap="goBack" />
@@ -13,18 +12,16 @@
       <ScrollView row="1" class="content-scroll">
         <StackLayout>
 
-          <!-- Intro -->
+
           <StackLayout class="intro-block" v-if="task">
             <Label :text="task.intro" class="intro-text" textWrap="true" />
           </StackLayout>
 
-          <!-- Нет данных -->
           <StackLayout v-if="!task" class="no-data-block">
             <Label text="😕" class="no-data-emoji" />
             <Label text="Задание не найдено" class="no-data-text" />
           </StackLayout>
 
-          <!-- Материалы (чеклист) -->
           <StackLayout class="white-block" v-if="task">
             <GridLayout columns="*, auto" class="accordion-header" @tap="toggleMaterials">
               <Label col="0" text="Что сегодня понадобится?" class="accordion-title" />
@@ -41,7 +38,6 @@
                   <StackLayout col="0" class="checkbox-wrap" :class="item.checked ? 'checked' : ''">
                     <Label v-if="item.checked" text="✓" class="checkbox-tick" />
                   </StackLayout>
-                  <!-- Emoji отдельным Label для правильного рендера -->
                   <Label col="1" :text="item.emoji" class="material-emoji" />
                   <Label col="2" :text="item.name" class="material-name" />
                 </GridLayout>
@@ -56,7 +52,6 @@
             </StackLayout>
           </StackLayout>
 
-          <!-- Шаги -->
           <StackLayout
             v-for="(step, idx) in (task ? task.steps : [])"
             :key="'step-' + idx"
@@ -72,7 +67,6 @@
             <Image :src="step.image" class="step-image" stretch="aspectFill" />
           </StackLayout>
 
-          <!-- Советы дня -->
           <StackLayout class="tips-section" v-if="task && task.tips.length > 0">
             <GridLayout columns="auto, *" class="tips-header-row">
               <Label col="0" text="🤔" class="section-emoji" />
@@ -84,7 +78,6 @@
             </StackLayout>
           </StackLayout>
 
-          <!-- Галерея участников -->
           <StackLayout
             class="gallery-section"
             v-if="task && task.gallery && task.gallery.length > 0"
@@ -111,7 +104,6 @@
             </ScrollView>
           </StackLayout>
 
-          <!-- Вопросы + настроение + заметка + фото -->
           <StackLayout class="white-block questions-block" v-if="task">
             <GridLayout columns="auto, *" class="questions-header-row">
               <Label col="0" text="❓" class="section-emoji" />
@@ -123,7 +115,6 @@
 
             <Label text="Как бы ты оценил своё настроение после задания?" class="mood-question" textWrap="true" />
 
-            <!-- Настроение — смайлики в WrapLayout -->
             <WrapLayout class="mood-wrap">
               <StackLayout
                 v-for="(emoji, idx) in moodEmojis"
@@ -132,12 +123,10 @@
                 @tap="selectMood(idx)"
                 width="52" height="52"
               >
-                <!-- Emoji в отдельном Label без лишних шрифтов -->
                 <Label :text="emoji" class="mood-emoji" verticalAlignment="center" horizontalAlignment="center" />
               </StackLayout>
             </WrapLayout>
 
-            <!-- Заметка -->
             <GridLayout columns="*, auto" class="note-header-row">
               <Label col="0" text="Заметка" class="note-label" />
               <Label col="1" text="✏️" class="note-edit-icon" />
@@ -151,17 +140,15 @@
               />
             </StackLayout>
 
-            <!-- Прикрепить фото -->
             <Label text="Фото результата" class="photo-label" />
             <StackLayout class="photo-attach-area" @tap="pickPhoto">
-              <!-- Если фото уже выбрано — показываем превью -->
               <Image
                 v-if="attachedPhoto"
                 :src="attachedPhoto"
                 class="photo-preview"
                 stretch="aspectFill"
               />
-              <!-- Иначе — кнопка-заглушка -->
+
               <StackLayout v-else class="photo-placeholder">
                 <Label text="📷" class="photo-placeholder-icon" horizontalAlignment="center" />
                 <Label text="Прикрепить фото" class="photo-placeholder-text" horizontalAlignment="center" />
@@ -174,7 +161,7 @@
               @tap="removePhoto"
             />
 
-            <Button text="✓  Завершить день" class="complete-button" @tap="completeDay" />
+            <Button text="✓  Завершить день" class="complete-button" @tap="completeDayHandler" />
           </StackLayout>
 
         </StackLayout>
@@ -188,9 +175,10 @@ import { ref } from 'nativescript-vue'
 import { $navigateBack, $navigateTo } from 'nativescript-vue'
 import { getDayTask } from '~/data/dayTasksData'
 import TaskCompletedPage from './TaskCompletedPage.vue'
-// Для выбора фото из галереи устройства
-import { ImagePicker, ImagePickerMediaType } from '@nativescript/imagepicker'
+import { completeDay } from '~/machines/challengeMachine' 
 
+import * as imagepicker from '@nativescript/imagepicker'
+import { ImageSource, knownFolders, path } from '@nativescript/core'
 const props = defineProps<{
   challengeId: number
   day: number
@@ -198,7 +186,7 @@ const props = defineProps<{
 
 const task = getDayTask(props.challengeId, props.day)
 
-// Материалы с реактивным checked
+
 const materialsList = ref(
   (task?.materials ?? []).map(m => ({ ...m, checked: false }))
 )
@@ -224,22 +212,32 @@ const noteText = ref('')
 
 // Прикреплённое фото
 const attachedPhoto = ref<string | null>(null)
-
 async function pickPhoto() {
   try {
-    const picker = new ImagePicker({
-      mode: 'single',
-      mediaType: ImagePickerMediaType.Image,
-    })
-    await picker.authorize()
-    const selection = await picker.present()
+    const context = imagepicker.create({ mode: 'single' })
+    await context.authorize()
+    const selection = await context.present()
     if (selection && selection.length > 0) {
-      const selected = selection[0]
-      await selected.getImageAsync()
-      attachedPhoto.value = selected.fileUri ?? selected.uri
+      const asset = selection[0] as any
+      
+      let uri = asset.uri || asset.fileUri
+      if (!uri && asset.android) uri = asset.android.toString()
+      if (!uri && asset.ios) uri = asset.ios
+      
+      if (!uri) {
+        console.error('Не удалось получить URI изображения')
+        return
+      }
+      
+      const imageSource = await ImageSource.fromFile(uri)
+      const folder = knownFolders.temp()
+      const fileName = `photo_${Date.now()}.jpg`
+      const filePath = path.join(folder.path, fileName)
+      imageSource.saveToFile(filePath, 'jpg')
+      attachedPhoto.value = filePath
     }
-  } catch (e) {
-    console.error('Ошибка выбора фото:', e)
+  } catch (error) {
+    console.error('Ошибка выбора фото:', error)
   }
 }
 
@@ -249,7 +247,8 @@ function removePhoto() {
 
 function goBack() { $navigateBack() }
 
-function completeDay() {
+function completeDayHandler() {
+  completeDay()
   $navigateTo(TaskCompletedPage, {
     props: {
       challengeId: props.challengeId,
@@ -262,7 +261,6 @@ function completeDay() {
 <style scoped>
 .page { background-color: #F3EEF9; }
 
-/* ── Header ─────────────────────────────────────────────────────────────── */
 .header-section {
   background-color: white;
   padding: 20px 20px 10px 20px;
@@ -281,10 +279,9 @@ function completeDay() {
   margin-bottom: 40px;
 }
 
-/* ── Scroll ──────────────────────────────────────────────────────────────── */
 .content-scroll { background-color: #F3EEF9; }
 
-/* ── Intro ───────────────────────────────────────────────────────────────── */
+
 .intro-block {
   background-color: #E9DCFB;
   padding: 20px 20px;
@@ -297,7 +294,6 @@ function completeDay() {
   line-height: 12px;
 }
 
-/* ── Белый блок ──────────────────────────────────────────────────────────── */
 .white-block {
   background-color: white;
   border-radius: 20px;
@@ -306,7 +302,6 @@ function completeDay() {
   box-shadow: 0px 2px 8px rgba(0,0,0,0.06);
 }
 
-/* ── Аккордеон материалов ────────────────────────────────────────────────── */
 .accordion-header {
   align-items: center;
   padding-bottom: 12px;
@@ -322,7 +317,6 @@ function completeDay() {
 }
 .accordion-arrow { font-size: 14px; color: #8E5EED; }
 
-/* ── Материалы ───────────────────────────────────────────────────────────── */
 .material-row {
   padding: 12px 0;
   border-bottom-width: 1px;
@@ -349,7 +343,6 @@ function completeDay() {
   text-align: center;
   font-weight: 800;
 }
-/* Emoji материала — отдельный Label, чтобы не конфликтовать с шрифтом текста */
 .material-emoji {
   font-size: 22px;
   width: 100px;
@@ -371,7 +364,6 @@ function completeDay() {
   margin-top: 4px;
 }
 
-/* ── Подсказка внизу чеклиста ────────────────────────────────────────────── */
 .tip-box {
   background-color: #FFF7ED;
   border-radius: 12px;
@@ -386,7 +378,6 @@ function completeDay() {
   line-height: 12px;
 }
 
-/* ── Шаги ────────────────────────────────────────────────────────────────── */
 .step-block { padding: 18px 16px 0 16px; }
 .step-header { align-items: center; margin-bottom: 10px; }
 .step-number-wrap {
@@ -426,7 +417,6 @@ function completeDay() {
   margin-bottom: 4px;
 }
 
-/* ── Советы дня ──────────────────────────────────────────────────────────── */
 .tips-section {
   background-color: #EDE0FF;
   border-radius: 20px;
@@ -461,7 +451,6 @@ function completeDay() {
   line-height: 12px;
 }
 
-/* ── Галерея участников ──────────────────────────────────────────────────── */
 .gallery-section {
   background-color: white;
   border-radius: 20px;
@@ -498,7 +487,6 @@ function completeDay() {
   padding: 6px 4px;
 }
 
-/* ── Вопросы ─────────────────────────────────────────────────────────────── */
 .questions-block { margin-bottom: 24px; }
 .questions-header-row { align-items: center; margin-bottom: 14px; }
 .questions-title {
@@ -520,7 +508,6 @@ function completeDay() {
   line-height: 20px;
 }
 
-/* ── Общий стиль emoji-иконок секций ────────────────────────────────────── */
 .section-emoji {
   font-size: 24px;
   width: 36px;
@@ -530,7 +517,6 @@ function completeDay() {
   margin-right: 10px;
 }
 
-/* ── Настроение ──────────────────────────────────────────────────────────── */
 .mood-question {
   font-family: 'Nunito', sans-serif;
   font-size: 15px;
@@ -553,7 +539,6 @@ function completeDay() {
 .mood-emoji-wrap.mood-selected {
   background-color: #8E5EED;
 }
-/* Emoji настроения: отдельный Label без привязки к шрифту текста */
 .mood-emoji {
   font-size: 28px;
   width: 100px;
@@ -562,7 +547,6 @@ function completeDay() {
   vertical-align: middle;
 }
 
-/* ── Заметка ─────────────────────────────────────────────────────────────── */
 .note-header-row { align-items: center; margin-bottom: 8px; margin-top: 4px; }
 .note-label {
   font-family: 'Nunito', sans-serif;
@@ -586,7 +570,6 @@ function completeDay() {
   min-height: 80px;
 }
 
-/* ── Прикрепить фото ─────────────────────────────────────────────────────── */
 .photo-label {
   font-family: 'Nunito', sans-serif;
   font-size: 16px;
@@ -629,7 +612,6 @@ function completeDay() {
   margin-bottom: 16px;
 }
 
-/* ── Завершить день ──────────────────────────────────────────────────────── */
 .complete-button {
   background-color: #8E5EED;
   color: white;
@@ -643,7 +625,6 @@ function completeDay() {
   box-shadow: 0px 4px 12px rgba(142,94,237,0.35);
 }
 
-/* ── Нет данных ──────────────────────────────────────────────────────────── */
 .no-data-block { align-items: center; padding: 60px 20px; }
 .no-data-emoji { font-size: 48px; text-align: center; margin-bottom: 12px; }
 .no-data-text {

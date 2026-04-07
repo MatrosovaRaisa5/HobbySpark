@@ -2,8 +2,6 @@
   <Page actionBarHidden="true" class="page" @loaded="onPageLoaded">
     <ScrollView>
       <StackLayout class="container">
-
-        <!-- ── Конфетти ── -->
         <GridLayout columns="*, *, *, *, *, *, *" class="confetti-row">
           <Label col="0" id="cf0" text="🎊" class="cf" />
           <Label col="1" id="cf1" text="✨" class="cf" />
@@ -22,13 +20,11 @@
           <Label col="5" id="cf12" text="🎊" class="cf cf-s" />
         </GridLayout>
 
-        <!-- ── Поздравление ── -->
         <StackLayout class="congrats-block" id="congratsBlock">
           <Label text="Поздравляем! 🎉" class="congrats-title" />
           <Label :text="challengeTitle" class="congrats-subtitle" />
         </StackLayout>
 
-        <!-- ── Фото ── -->
         <StackLayout class="img-wrap" id="imgBlock">
           <GridLayout rows="auto" columns="*" class="img-circle">
             <Image row="0" col="0" :src="challengeImage" class="challenge-img" stretch="aspectFill" />
@@ -38,14 +34,12 @@
           </StackLayout>
         </StackLayout>
 
-        <!-- ── Прогресс (надёжный GridLayout columns) ── -->
         <StackLayout class="progress-card" id="progressCard">
           <GridLayout columns="*, auto" class="prog-hdr">
             <Label col="0" text="ПРОГРЕСС ИСПЫТАНИЯ" class="prog-label" />
-            <Label col="1" :text="'День ' + day + ' из 7'" class="prog-day" />
+            <Label col="1" :text="'День ' + day + ' из ' + totalDays" class="prog-day" />
           </GridLayout>
 
-          <!-- Трек: заполненная часть + пустая через columns -->
           <GridLayout :columns="progressCols" class="prog-track">
             <StackLayout col="0" class="prog-filled" />
             <StackLayout col="1" class="prog-empty" />
@@ -53,11 +47,10 @@
 
           <GridLayout columns="auto, *, auto" class="prog-labels">
             <Label col="0" text="День 1" class="prog-edge" />
-            <Label col="2" text="День 7" class="prog-edge" />
+            <Label col="2" :text="'День ' + totalDays" class="prog-edge" />
           </GridLayout>
         </StackLayout>
 
-        <!-- ── Награды ── -->
         <GridLayout columns="*, *" class="rewards" id="rewardsRow">
           <StackLayout col="0" class="reward-card reward-l">
             <Label text="✨  15" class="reward-val" />
@@ -69,8 +62,12 @@
           </StackLayout>
         </GridLayout>
 
-        <!-- ── Задание на завтра ── -->
-        <StackLayout class="tomorrow-card" id="tomorrowCard" @tap="goToNextDay">
+        <StackLayout
+          class="tomorrow-card"
+          id="tomorrowCard"
+          @tap="goToNextDay"
+          v-if="!isLastDay"
+        >
           <Label text="ЗАДАНИЕ НА ЗАВТРА:" class="tomorrow-lbl" />
           <GridLayout columns="*, auto">
             <Label col="0" :text="nextDayTitle" class="tomorrow-title" textWrap="true" />
@@ -78,12 +75,11 @@
           </GridLayout>
         </StackLayout>
 
-        <!-- ── Кнопки ── -->
-        <!--
-          "Продолжить" → возвращает на MainPage без глюков:
-          используем Frame.topmost().navigate() с анимацией slideBottom
-          вместо clearHistory который сжимает страницу
-        -->
+        <StackLayout class="tomorrow-card" id="tomorrowCard" v-if="isLastDay">
+          <Label text="🏆 ВЫ ПРОШЛИ ЧЕЛЛЕНДЖ!" class="tomorrow-lbl" />
+          <Label text="Все 7 дней выполнены. Вы восхитительны!" class="tomorrow-title" textWrap="true" />
+        </StackLayout>
+
         <Button text="Продолжить  ›" class="continue-btn" @tap="goToMain" />
         <Button class="share-btn" @tap="shareResult">
           <FormattedString>
@@ -98,17 +94,18 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'nativescript-vue'
+import { computed, onMounted } from 'nativescript-vue'
 import { Frame, CoreTypes } from '@nativescript/core'
 import { $navigateTo } from 'nativescript-vue'
 import { challengesData } from '~/data/challengesData'
 import { getDayTask } from '~/data/dayTasksData'
+import { getTotalDays } from '~/machines/challengeMachine'
 import DayTaskPage from './DayTaskPage.vue'
 import MainPage from './MainPage.vue'
 
 const props = defineProps<{
   challengeId: number
-  day: number
+  day: number  
 }>()
 
 const challenge = computed(() =>
@@ -118,22 +115,28 @@ const challenge = computed(() =>
 const challengeTitle = computed(() => challenge.value.title)
 const challengeImage = computed(() => challenge.value.image)
 
-// Прогресс-бар через columns (надёжно в NativeScript)
+const totalDays = getTotalDays() 
+
+const isLastDay = computed(() => props.day >= totalDays)
+
 const progressCols = computed(() => {
-  const pct = Math.max(4, (props.day / 7) * 100)
+  const pct = Math.max(4, (props.day / totalDays) * 100)
   return `${pct}*, ${100 - pct}*`
 })
 
 const nextDayTitle = computed(() => {
   const next = getDayTask(props.challengeId, props.day + 1)
-  return next?.title ?? challenge.value.weeklyProgram[props.day]?.title ?? 'Следующий день'
+  return next?.title ?? challenge.value.weeklyProgram?.[props.day]?.title ?? 'Следующий день'
 })
 
-// ── Конфетти-анимация ──
+
+onMounted(() => {
+})
+
+
 function onPageLoaded(args: any) {
   const page = args.object
 
-  // Плавное появление блоков
   const blockIds = ['congratsBlock', 'imgBlock', 'progressCard', 'rewardsRow', 'tomorrowCard']
   blockIds.forEach((id, i) => {
     const view = page.getViewById(id)
@@ -149,7 +152,6 @@ function onPageLoaded(args: any) {
     })
   })
 
-  // Конфетти взлетают и исчезают
   const cfItems = [
     { id: 'cf0',  dx: -55, dy: -80 },
     { id: 'cf1',  dx:  15, dy: -100 },
@@ -170,8 +172,6 @@ function onPageLoaded(args: any) {
     const view = page.getViewById(id)
     if (!view) return
     view.opacity = 1
-
-    // Взлёт
     view.animate({
       translate: { x: dx, y: dy },
       scale: { x: 1.5, y: 1.5 },
@@ -180,7 +180,6 @@ function onPageLoaded(args: any) {
       delay: i * 55,
       curve: CoreTypes.AnimationCurve.easeOut,
     }).then(() => {
-      // Падение + исчезание
       return view.animate({
         translate: { x: dx * 0.4, y: 60 },
         scale: { x: 0.5, y: 0.5 },
@@ -192,11 +191,9 @@ function onPageLoaded(args: any) {
   })
 }
 
-// ── Навигация ──
 function goToMain() {
   $navigateTo(MainPage, { clearHistory: true })
 }
- 
 
 function shareResult() {
   console.log('Share result')
@@ -221,13 +218,11 @@ function goToNextDay() {
   align-items: center;
 }
 
-/* ── Конфетти ── */
 .confetti-row { width: 100%; margin-top: 8px; }
 .confetti-row2 { width: 100%; margin-left: 16px; }
 .cf { font-size: 28px; text-align: center; }
 .cf-s { font-size: 22px; }
 
-/* ── Поздравление ── */
 .congrats-block {
   align-items: center;
   margin-top: 12px;
@@ -248,7 +243,6 @@ function goToNextDay() {
   text-align: center;
 }
 
-/* ── Изображение ── */
 .img-wrap {
   align-items: center;
   margin-bottom: 22px;
@@ -282,7 +276,6 @@ function goToNextDay() {
 }
 .badge-emoji { font-size: 22px; text-align: center; }
 
-/* ── Прогресс ── */
 .progress-card {
   background-color: white;
   border-radius: 18px;
@@ -306,7 +299,6 @@ function goToNextDay() {
   color: #181820;
 }
 
-/* Прогресс-бар через GridLayout columns */
 .prog-track {
   height: 12px;
   border-radius: 8px;
@@ -327,7 +319,6 @@ function goToNextDay() {
   color: #9095A0;
 }
 
-/* ── Награды ── */
 .rewards { width: 100%; margin-bottom: 12px; }
 .reward-card {
   background-color: white;
@@ -352,7 +343,6 @@ function goToNextDay() {
   text-align: center;
 }
 
-/* ── Завтра ── */
 .tomorrow-card {
   background-color: white;
   border-radius: 16px;
@@ -381,7 +371,6 @@ function goToNextDay() {
   align-self: center;
 }
 
-/* ── Кнопки ── */
 .continue-btn {
   background-color: white;
   color: #8E5EED;

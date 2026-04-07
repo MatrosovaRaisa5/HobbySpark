@@ -37,7 +37,7 @@
 
             <Label :text="challenge.description" class="challenge-description" textWrap="true" />
 
-            <Button text="Начать вызов" class="start-button" @tap="startChallenge" />
+            <Button text="Начать вызов" class="start-button" @tap="startChallengeHandler" />
 
             <Label text="Еженедельная программа" class="section-title" />
 
@@ -79,34 +79,38 @@
   </template>
 
   <script lang="ts" setup>
-  import { ref, computed } from 'nativescript-vue'
-  import { $navigateBack, $navigateTo } from 'nativescript-vue'
-  import { challengesData } from '~/data/challengesData'
-  import DayTaskPage from './DayTaskPage.vue'
+import { ref, computed } from 'nativescript-vue'
+import { $navigateBack, $navigateTo } from 'nativescript-vue'
+import { challengesData } from '~/data/challengesData'
+import DayTaskPage from './DayTaskPage.vue'
+import { startChallenge } from '~/machines/challengeMachine'
 
-  const props = defineProps<{ challengeId: number }>()
+const props = defineProps<{ challengeId: number }>()
 
-  const challenge = computed(() => {
-    return challengesData.find(c => c.id === props.challengeId) || challengesData[0]
-  })
+const challenge = computed(() => {
+  return challengesData.find(c => c.id === props.challengeId) || challengesData[0]
+})
 
-  const openDayIndex = ref<number | null>(null)
+const openDayIndex = ref<number | null>(null)
 
-  function toggleDay(index: number) {
-    openDayIndex.value = openDayIndex.value === index ? null : index
-  }
+function toggleDay(index: number) {
+  openDayIndex.value = openDayIndex.value === index ? null : index
+}
 
-  function goBack() {
-    $navigateBack()
-  }
+function goBack() {
+  $navigateBack()
+}
 
-  function startChallenge() {
-    $navigateTo(DayTaskPage, { props: { challengeId: challenge.value.id, day: 1 } })
-  }
+function startChallengeHandler() {
+  // Запускаем (или переключаем) челлендж с нужным количеством дней
+  startChallenge(challenge.value.id, challenge.value.weeklyProgram.length)
+  // Переходим на первый день
+  $navigateTo(DayTaskPage, { props: { challengeId: challenge.value.id, day: 1 } })
+}
 
-  function inviteFriends() {
-    console.log('Пригласить друзей')
-  }
+function inviteFriends() {
+  console.log('Пригласить друзей')
+}
   </script>
 
   <style scoped>
