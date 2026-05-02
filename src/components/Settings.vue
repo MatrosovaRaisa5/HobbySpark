@@ -27,13 +27,7 @@
               <Image col="1" src="res://next" width="20" height="20" class="card-arrow" />
             </GridLayout>
 
-            <GridLayout columns="*, auto" class="settings-card" @tap="goToLanguage">
-              <StackLayout col="0" class="card-text-container">
-                <Label text="Язык" class="card-main-text" />
-                <Label text="Измените язык интерфейса приложения" class="card-sub-text" textWrap="true" />
-              </StackLayout>
-              <Image col="1" src="res://next" width="20" height="20" class="card-arrow" />
-            </GridLayout>
+            
           </StackLayout>
 
           <StackLayout class="settings-block">
@@ -76,44 +70,50 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'nativescript-vue'
-import { $navigateBack, $navigateTo } from 'nativescript-vue'
-import { ApplicationSettings, Dialogs } from '@nativescript/core'
-import LoginPage from './LoginPage.vue'
-import PersonalDataPage from './PersonalDataPage.vue'
+import { ref, onMounted } from 'nativescript-vue';
+import { $navigateBack, $navigateTo } from 'nativescript-vue';
+import { ApplicationSettings, Dialogs } from '@nativescript/core';
+import { api } from '~/services/api';
+import LoginPage from './LoginPage.vue';
+import PersonalDataPage from './PersonalDataPage.vue';
 
-const notificationsEnabled = ref(true)
+const notificationsEnabled = ref(true);
 
 function toggleNotifications() {
-  notificationsEnabled.value = !notificationsEnabled.value
-  ApplicationSettings.setBoolean('notifications_enabled', notificationsEnabled.value)
+    notificationsEnabled.value = !notificationsEnabled.value;
+    ApplicationSettings.setBoolean('notifications_enabled', notificationsEnabled.value);
 }
 
-function goBack() { $navigateBack() }
-function goToPersonalData() { $navigateTo(PersonalDataPage) }
-function goToLanguage() { console.log('Переход к языку') }
-
-function logout() {
-  ApplicationSettings.remove('access_token')
-  ApplicationSettings.remove('refresh_token')
-  ApplicationSettings.remove('user_name')
-  ApplicationSettings.remove('user_login')
-  ApplicationSettings.remove('pending_user_name')
-  $navigateTo(LoginPage, { clearHistory: true })
+async function logout() {
+    ApplicationSettings.remove('access_token');
+    ApplicationSettings.remove('user_name');
+    ApplicationSettings.remove('user_login');
+    ApplicationSettings.remove('pending_user_name');
+    ApplicationSettings.remove('interests_selected');
+    $navigateTo(LoginPage, { clearHistory: true });
 }
 
-function deleteAccount() {
-  Dialogs.confirm('Удалить аккаунт? Это необратимо.').then(async (ok) => {
+async function deleteAccount() {
+    const ok = await Dialogs.confirm('Удалить аккаунт? Это необратимо.');
     if (ok) {
-      await Dialogs.alert('Функция удаления пока не реализована на сервере')
+        try {
+            await api.deleteAccount();
+            ApplicationSettings.clear();
+            $navigateTo(LoginPage, { clearHistory: true });
+        } catch (err: any) {
+            await Dialogs.alert('Ошибка удаления: ' + err.message);
+        }
     }
-  })
 }
+
+function goBack() { $navigateBack(); }
+function goToPersonalData() { $navigateTo(PersonalDataPage); }
+function goToLanguage() { console.log('Переход к языку'); }
 
 onMounted(() => {
-  const saved = ApplicationSettings.getBoolean('notifications_enabled', true)
-  notificationsEnabled.value = saved
-})
+    const saved = ApplicationSettings.getBoolean('notifications_enabled', true);
+    notificationsEnabled.value = saved;
+});
 </script>
 
 <style scoped>

@@ -3,98 +3,35 @@
     <GridLayout rows="auto, *">
       <StackLayout row="0" class="header-section">
         <GridLayout columns="auto, *" class="header-content">
-          <Image
-            col="0"
-            src="res://back"
-            width="27"
-            height="27"
-            class="back-button"
-            @tap="goBack"
-          />
-          <Label col="1" text="Журнал прогресса" class="header-title" />
+          <Image col="0" src="res://back" width="27" height="27" class="back-button" @tap="goBack" />
+          <Label col="1" text="Мои заметки" class="header-title" />
         </GridLayout>
       </StackLayout>
 
       <ScrollView row="1" class="content-scroll">
         <StackLayout class="content-container">
-          <Label text="Активность" class="section-title" />
+          <Label v-if="notes.length > 0" text="Заметки и мысли" class="section-title" />
+          <Label v-else text="У вас пока нет заметок" class="empty-text" textWrap="true" />
 
-          <GridLayout class="calendar-card" rows="auto, auto, auto" columns="*">
-            <GridLayout row="0" columns="auto, *, auto" class="calendar-header">
-              <Image
-                col="0"
-                src="res://back"
-                width="25"
-                height="25"
-                class="month-nav"
-                @tap="prevMonth"
-              />
-              <Label col="1" :text="currentMonthLabel" class="month-year" textAlignment="center" />
-              <Image
-                col="2"
-                src="res://next"
-                width="25"
-                height="25"
-                class="month-nav"
-                @tap="nextMonth"
-              />
-            </GridLayout>
-
-            <GridLayout row="1" columns="*,*,*,*,*,*,*" class="weekdays">
-              <Label
-                v-for="(day, i) in weekdays"
-                :key="i"
-                :col="i"
-                :text="day"
-                class="weekday-label"
-                textAlignment="center"
-              />
-            </GridLayout>
-
-            <!-- Сетка дней (6 строк по 7 колонок) -->
-            <GridLayout
-              row="2"
-              columns="*,*,*,*,*,*,*"
-              rows="50,50,50,50,50,50"
-              class="days-grid"
-            >
-              <StackLayout
-                v-for="(day, index) in daysArray"
-                :key="index"
-                :col="index % 7"
-                :row="Math.floor(index / 7)"
-                class="day-cell"
-                :class="{
-                  'has-notes': day?.hasNotes,
-                  'selected-day': day?.date === selectedDateStr,
-                  'empty-day': !day
-                }"
-                @tap="onDayTap(day)"
-              >
-                <Label v-if="day" :text="day.dayNumber" class="day-number" />
-              </StackLayout>
-            </GridLayout>
-          </GridLayout>
-
-          <!-- Заметки выбранного дня (показываем только если есть заметки) -->
-          <Label
-            v-if="selectedDateNotes.length > 0"
-            text="Заметки и мысли"
-            class="section-title"
-          />
-
-          <StackLayout v-for="(note, idx) in selectedDateNotes" :key="idx" class="note-card">
+          <StackLayout v-for="(note, idx) in notes" :key="idx" class="note-card">
             <GridLayout columns="auto, *" class="note-content">
+              <!-- Фото: прямой URL с обработкой ошибок -->
               <Image
+                v-if="note.image"
                 col="0"
-                :src="note.image ? 'res://' + note.image : 'res://nopic'"
-                width="96"
-                height="96"
+                :src="baseUrl + note.image"
+                width="96" height="96"
                 class="note-image"
+                @error="onImageError"
               />
+              <Label v-else col="0" text="📷" class="note-image-placeholder" />
               <StackLayout col="1" class="note-text-container">
-                <Label :text="note.title" class="note-title" textWrap="true" />
+                <Label
+                  :text="note.challengeTitle ? note.challengeTitle + ' : День ' + note.dayNumber : note.title"
+                  class="note-title" textWrap="true"
+                />
                 <Label :text="note.text" class="note-text" textWrap="true" />
+                <Label :text="note.date" class="note-date" textWrap="true" />
               </StackLayout>
             </GridLayout>
           </StackLayout>
@@ -105,255 +42,90 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'nativescript-vue'
-import { $navigateBack } from 'nativescript-vue'
-import { progressNotes, Note } from '../data/progressData'
+import { ref, onMounted } from 'nativescript-vue';
+import { $navigateBack } from 'nativescript-vue';
+import { api } from '~/services/api';
 
-interface DayItem {
-  dayNumber: number
-  date: string
-  hasNotes: boolean
+const BASE_URL = 'http://10.43.180.61:8080';   // ваш IP
+const baseUrl = BASE_URL;
+
+interface NoteItem {
+    title: string;
+    text: string;
+    image: string | null;
+    date: string;
+    dayNumber: number;
+    challengeTitle: string;
 }
 
-const currentDate = ref(new Date(2026, 2, 1)) // март 2026
-const selectedDateStr = ref('2026-03-13')
+const notes = ref<NoteItem[]>([]);
 
-const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-
-const currentMonthLabel = computed(() => {
-  const months = [
-    'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-  ]
-  return months[currentDate.value.getMonth()] + ' ' + currentDate.value.getFullYear()
-})
-
-// Генерация массива дней (42 ячейки)
-const daysArray = computed(() => {
-  const year = currentDate.value.getFullYear()
-  const month = currentDate.value.getMonth()
-  const firstDay = new Date(year, month, 1)
-
-  // Понедельник = 0, воскресенье = 6
-  let firstWeekday = firstDay.getDay()
-  let offset = firstWeekday === 0 ? 6 : firstWeekday - 1
-
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const days: (DayItem | null)[] = []
-
-  for (let i = 0; i < offset; i++) {
-    days.push(null)
-  }
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-    const hasNotes = !!(progressNotes as any)[dateStr]
-    days.push({
-      dayNumber: d,
-      date: dateStr,
-      hasNotes
-    })
-  }
-
-  while (days.length < 42) {
-    days.push(null)
-  }
-  return days
-})
-
-const selectedDateNotes = computed<Note[]>(() => {
-  return progressNotes[selectedDateStr.value] || []
-})
-
-function onDayTap(day: DayItem | null) {
-  if (day?.hasNotes) {
-    selectedDateStr.value = day.date
-  }
+function formatDateRu(dateStr: string): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const months = [
+        'января','февраля','марта','апреля','мая','июня',
+        'июля','августа','сентября','октября','ноября','декабря'
+    ];
+    const day = d.getDate();
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year} г.`;
 }
 
-function prevMonth() {
-  const newDate = new Date(currentDate.value)
-  newDate.setMonth(newDate.getMonth() - 1)
-  currentDate.value = newDate
-  selectFirstNoteDayOfMonth(newDate)
+function onImageError(args: any) {
+    // При ошибке прячем изображение (можно заменить на плейсхолдер)
+    const img = args.object;
+    img.src = 'res://nopic';  // или просто скрыть
 }
 
-function nextMonth() {
-  const newDate = new Date(currentDate.value)
-  newDate.setMonth(newDate.getMonth() + 1)
-  currentDate.value = newDate
-  selectFirstNoteDayOfMonth(newDate)
-}
+onMounted(async () => {
+    try {
+        const data = await api.getNotes();
+        notes.value = data.map((n: any) => ({
+            title: n.title,
+            text: n.text || '',
+            image: n.image || null,
+            date: n.date ? formatDateRu(n.date) : '',
+            dayNumber: n.dayNumber ?? parseInt(n.title?.replace('День ', '') || '0'),
+            challengeTitle: n.challengeTitle || '',
+        }));
+    } catch (e) {
+        console.error('Ошибка загрузки заметок', e);
+    }
+});
 
-function selectFirstNoteDayOfMonth(date: Date) {
-  const year = date.getFullYear()
-  const month = date.getMonth() + 1
-  const firstNoteDate = Object.keys(progressNotes).find(dateStr => {
-    const [y, m] = dateStr.split('-').map(Number)
-    return y === year && m === month
-  })
-  selectedDateStr.value = firstNoteDate || ''
-}
-
-function goBack() {
-  $navigateBack()
-}
-
-// Инициализация: выбрать первый день с заметками в текущем месяце
-selectFirstNoteDayOfMonth(currentDate.value)
+function goBack() { $navigateBack(); }
 </script>
 
 <style scoped>
+.note-image-placeholder {
+    font-size: 30px;
+    text-align: center;
+    vertical-align: middle;
+    width: 96px;
+    height: 96px;
+    border-radius: 30px;
+    background-color: #f0f0f0;
+    margin: 20px;
+}
 .page {
-  background-color: white;
+  background: linear-gradient(to top, #d5bbffe4, #fdfdfd 50%);
 }
-
-.header-section {
-  background-color: white;
-  padding: 20px 20px 10px 20px;
-  border-bottom-width: 1px;
-  border-bottom-color: #F0F0F0;
-}
-
-.header-content {
-  align-items: center;
-}
-
-.back-button {
-  margin-right: 17px;
-}
-
-.header-title {
-  font-family: 'Nunito', sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  color: #181820;
-  margin-top: 27px;
-  margin-left: 20px;
-  margin-bottom: 40px;
-}
-
-.content-scroll {
-  background-color: white;
-}
-
-.content-container {
-  padding: 0 16px 20px 16px;
-}
-
-.section-title {
-  font-family: 'Nunito', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  color: #181820;
-  margin-top: 12px;
-  margin-bottom: 13px;
-  margin-left: 30px;
-}
-
-.calendar-card {
-  background-color: white;
-  border-radius: 6px;
-  padding: 12px 8px;
-  box-shadow: 0px 4px 7px rgba(23, 26, 31, 0.13), 0px 4px 2px rgba(23, 26, 31, 0.08);
-  margin-bottom: 16px;
-}
-
-.calendar-header {
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.month-nav {
-  padding: 40px;
-}
-
-.month-year {
-  font-family: 'Nunito', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  color: #181820;
-}
-
-.weekdays {
-  margin-bottom: 8px;
-}
-
-.weekday-label {
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #363645;
-}
-
-.days-grid {
-  margin-bottom: 8px;
-}
-
-.day-cell {
-  background-color: #f7f7fa94;
-  border-radius: 20px;
-  align-items: center;
-  justify-content: center;
-  margin: 8px;
-  height: 100%;
-}
-
-.empty-day {
-  background-color: transparent;
-}
-
-.day-number {
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #181820;
-  margin: 8px;
-}
-
-.has-notes {
-  background-color: #8E5EED33;
-}
-
-.selected-day {
-  border-width: 5px;
-  border-color: #9c6affa8;
-}
-
-.note-card {
-  background-color: white;
-  border-radius: 40px;
-  padding: 20px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.262);
-  margin: 20px;
-}
-
-.note-content {
-  align-items: center;
-}
-
-.note-image {
-  border-radius: 30px;
-  margin: 20px;
-}
-
-.note-text-container {
-  padding-left: 8px;
-  margin: 20px;
-}
-
-.note-title {
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  color: #181820;
-  margin-bottom: 4px;
-}
-
-.note-text {
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  color: #181820;
-}
+.header-section { background-color: white; padding: 20px 20px 10px 20px; border-bottom-width: 1px; border-bottom-color: #F0F0F0; }
+.header-content { align-items: center; }
+.back-button { margin-right: 17px; }
+.header-title { font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 700; color: #181820; margin-top: 27px; margin-left: 20px; margin-bottom: 40px; }
+.content-scroll { background-color:  #8e5eed36; }
+.content-container { padding: 0 16px 20px 16px; }
+.section-title { font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 700; color: #181820; margin-top: 12px; margin-bottom: 13px; margin-left: 30px; }
+.empty-text { font-family: 'Nunito Sans', sans-serif; font-size: 16px; color: #9095A0; text-align: center; margin-top: 60px; }
+.note-card { background-color: white; border-radius: 40px; padding: 20px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.262); margin: 20px; }
+.note-content { align-items: center; }
+.note-image { border-radius: 30px; margin: 20px; }
+.note-text-container { padding-left: 8px; margin: 20px; }
+.note-title { font-family: 'Nunito Sans', sans-serif; font-size: 15px; font-weight: 600; color: #181820; margin-bottom: 4px; }
+.note-text { font-family: 'Nunito Sans', sans-serif; font-size: 13px; font-weight: 400; color: #181820; }
+.note-date { font-family: 'Nunito Sans', sans-serif; font-size: 11px; color: #9095A0; margin-top: 6px; }
 </style>

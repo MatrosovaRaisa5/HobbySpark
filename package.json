@@ -7,7 +7,6 @@
     "@nativescript/camera": "^7.0.0",
     "@nativescript/core": "~8.9.1",
     "@nativescript/imagepicker": "^5.0.0",
-    "@xstate/vue": "^5.0.0",
     "nativescript-calendar": "^3.0.0",
     "nativescript-vue": "^3.0.2",
     "xstate": "^4.38.3"

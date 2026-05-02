@@ -22,31 +22,31 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'nativescript-vue'
-import { $navigateBack } from 'nativescript-vue'
-import { Dialogs, ApplicationSettings } from '@nativescript/core'
-import { api } from '~/services/api'
+import { ref } from 'nativescript-vue';
+import { $navigateBack } from 'nativescript-vue';
+import { Dialogs, ApplicationSettings } from '@nativescript/core';
+import { api } from '~/services/api';
 
-const login = ref('')
-const password = ref('')
-const name = ref('')
+const login = ref('');
+const password = ref('');
+const name = ref('');
 
 async function doRegister() {
-  if (!login.value || !password.value || !name.value) {
-    await Dialogs.alert('Заполните все поля')
-    return
-  }
-  try {
-    await api.signup(login.value, password.value, name.value)
-    ApplicationSettings.setString('pending_user_name', name.value)
-    await Dialogs.alert('Регистрация успешна! Теперь войдите.')
-    $navigateBack()
-  } catch (err: any) {
-    await Dialogs.alert('Ошибка: ' + err.message)
-  }
+    if (!login.value || !password.value || !name.value) {
+        await Dialogs.alert('Заполните все поля');
+        return;
+    }
+    try {
+        await api.signup(login.value, password.value, name.value);
+        ApplicationSettings.setString('pending_user_name', name.value);
+        await Dialogs.alert('Регистрация успешна! Теперь войдите.');
+        $navigateBack();
+    } catch (err: any) {
+        await Dialogs.alert('Ошибка: ' + err.message);
+    }
 }
 
-function goBack() { $navigateBack() }
+function goBack() { $navigateBack(); }
 </script>
 
 <style scoped>

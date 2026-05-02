@@ -22,44 +22,41 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'nativescript-vue'
-import { $navigateBack, $navigateTo } from 'nativescript-vue'
-import { Dialogs, ApplicationSettings } from '@nativescript/core'
-import { api } from '~/services/api'
-import RegisterPage from './RegisterPage.vue'
-import CatalogPage from './CatalogPage.vue'
+import { ref } from 'nativescript-vue';
+import { $navigateBack, $navigateTo } from 'nativescript-vue';
+import { Dialogs, ApplicationSettings } from '@nativescript/core';
+import { api } from '~/services/api';
+import RegisterPage from './RegisterPage.vue';
+import CatalogPage from './CatalogPage.vue';
+import InterestSelection from './InterestSelection.vue';
 
-const login = ref('')
-const password = ref('')
+const login = ref('');
+const password = ref('');
 
 async function doLogin() {
-  if (!login.value || !password.value) {
-    await Dialogs.alert('Введите логин и пароль')
-    return
-  }
-  try {
-    const result = await api.login(login.value, password.value)
-    ApplicationSettings.setString('access_token', result.access_token)
-    ApplicationSettings.setString('refresh_token', result.refresh_token)
-
-    // Берём имя из временного хранилища (если регистрировались только что)
-    const pendingName = ApplicationSettings.getString('pending_user_name')
-    if (pendingName) {
-      ApplicationSettings.setString('user_name', pendingName)
-      ApplicationSettings.remove('pending_user_name')
-    } else {
-      ApplicationSettings.setString('user_name', login.value)
+    if (!login.value || !password.value) {
+        await Dialogs.alert('Введите логин и пароль');
+        return;
     }
-    ApplicationSettings.setString('user_login', login.value)
+    try {
+        const result = await api.login(login.value, password.value);
+        ApplicationSettings.setString('access_token', result.token);
+        ApplicationSettings.setString('user_name', result.name);
+        ApplicationSettings.setBoolean('interests_selected', result.interestsSelected);
+        ApplicationSettings.setString('user_login', login.value);
 
-    $navigateTo(CatalogPage, { clearHistory: true })
-  } catch (err: any) {
-    await Dialogs.alert('Ошибка входа: ' + err.message)
-  }
+        if (result.interestsSelected) {
+            $navigateTo(CatalogPage, { clearHistory: true });
+        } else {
+            $navigateTo(InterestSelection, { clearHistory: true });
+        }
+    } catch (err: any) {
+        await Dialogs.alert('Ошибка входа: ' + err.message);
+    }
 }
 
-function goBack() { $navigateBack() }
-function goToRegister() { $navigateTo(RegisterPage) }
+function goBack() { $navigateBack(); }
+function goToRegister() { $navigateTo(RegisterPage); }
 </script>
 
 <style scoped>

@@ -1,77 +1,110 @@
 import { Http } from '@nativescript/core';
 import { ApplicationSettings } from '@nativescript/core';
 
-const BASE_URL = 'http://10.88.211.11:8080';
+const BASE_URL = 'http://10.43.180.61:8080/api';
 
 export const api = {
-  async request(endpoint: string, method: string, body?: any, needAuth = true) {
-    const headers: any = { 'Content-Type': 'application/json' };
-    if (needAuth) {
-      const token = ApplicationSettings.getString('access_token');
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-    }
-    const options: any = {
-      url: `${BASE_URL}${endpoint}`,
-      method,
-      headers,
-      content: body ? JSON.stringify(body) : undefined,
-    };
-    const response = await Http.request(options);
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (response.content) {
-        try { return response.content.toJSON(); } catch { return response.content.toString(); }
-      }
-      return null;
-    } else {
-      let errorMsg = `Ошибка ${response.statusCode}`;
-      if (response.content) {
-        try { const err = response.content.toJSON(); errorMsg = err.message || errorMsg; } catch {}
-      }
-      throw new Error(errorMsg);
-    }
-  },
+    async request(endpoint: string, method: string, body?: any, needAuth = true, isMultipart = false) {
+        const headers: any = {};
+        if (!isMultipart) {
+            headers['Content-Type'] = 'application/json';
+        }
+        if (needAuth) {
+            const token = ApplicationSettings.getString('access_token');
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+        }
 
-  // Аутентификация
-  signup(login: string, password: string, name: string) {
-    return this.request('/auth/signup', 'POST', { login, password, name }, false);
-  },
-  login(login: string, password: string) {
-    return this.request('/auth/login', 'POST', { login, password }, false);
-  },
-  getProfile() {
-    return this.request('/users/me', 'GET');
-  },
-  updateProfile(data: { name?: string; avatar_url?: string | null; bio?: string | null }) {
-    return this.request('/users/me', 'PUT', data);
-  },
+        const options: any = {
+            url: `${BASE_URL}${endpoint}`,
+            method,
+            headers,
+        };
+        if (body) {
+            options.content = isMultipart ? body : JSON.stringify(body);
+        }
 
-  // Интересы
-  getAllInterests() {
-    return this.request('/interests/all', 'GET', undefined, false); // без авторизации
-  },
-  getMyInterests() {
-    return this.request('/interests/me', 'GET');
-  },
-  updateMyInterests(interestNames: string[]) {
-    return this.request('/interests/me', 'PUT', { interestNames });
-  },
+        const response = await Http.request(options);
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+            if (response.content) {
+                try {
+                    return response.content.toJSON();
+                } catch {
+                    return response.content.toString();
+                }
+            }
+            return null;
+        } else {
+            let errorMsg = `Ошибка ${response.statusCode}`;
+            if (response.content) {
+                try {
+                    const err = response.content.toJSON();
+                    errorMsg = err.message || errorMsg;
+                } catch { /* ignore */ }
+            }
+            throw new Error(errorMsg);
+        }
+    },
 
-  // Челленджи
-  getChallenges(page = 1, size = 10) {
-    return this.request(`/challenges?page=${page}&size=${size}`, 'GET', undefined, false);
-  },
-  getChallengeById(id: number | string) {
-    return this.request(`/challenges/${id}`, 'GET', undefined, false);
-  },
+    // Аутентификация
+    signup(login: string, password: string, name: string) {
+        return this.request('/auth/signup', 'POST', { login, password, name }, false);
+    },
+    login(login: string, password: string) {
+        return this.request('/auth/login', 'POST', { login, password }, false);
+    },
 
-  // Прогресс
-  startChallenge(challengeId: string) {
-    return this.request('/progress/start', 'POST', { challengeId });
-  },
-  completeDay(challengeId: string, day: number, note: string, mood: string) {
-    return this.request('/progress/complete-day', 'POST', { challengeId, day, note, mood });
-  },
-  getMyProgress() {
-    return this.request('/progress/me', 'GET');
-  },
+    // Профиль
+    getProfile() {
+        return this.request('/user/profile', 'GET');
+    },
+    updateProfile(data: { name?: string }) {
+        return this.request('/user/profile', 'PUT', { name: data.name });
+    },
+    deleteAccount() {
+        return this.request('/user', 'DELETE');
+    },
+
+    // Интересы
+    getAllInterests() {
+        return this.request('/interests', 'GET', undefined, false);
+    },
+    saveInterests(interestIds: number[]) {
+        return this.request('/interests', 'POST', { interestIds });
+    },
+
+    // Челленджи
+    getChallenges() {
+        return this.request('/challenges', 'GET');
+    },
+    getChallengeById(id: number) {
+        return this.request(`/challenges/${id}`, 'GET');
+    },
+
+    // Прогресс
+    startChallenge(challengeId: number) {
+        return this.request(`/challenges/${challengeId}/start`, 'POST');
+    },
+    getDayTask(challengeId: number, day: number) {
+        return this.request(`/challenges/${challengeId}/days/${day}`, 'GET');
+    },
+    async completeDay(challengeId: number, day: number, mood?: number, note?: string, photoBase64?: string) {
+        const body: any = {};
+        if (mood !== undefined && mood !== null) body.mood = mood;
+        if (note) body.note = note;
+        if (photoBase64) body.photoBase64 = photoBase64;
+        return this.request(`/challenges/${challengeId}/days/${day}/complete`, 'POST', body);
+    },
+
+    // Пользовательские челленджи
+    getActiveChallenge(): Promise<{ challengeId: number; title: string; currentDay: number; totalDays: number; completed: boolean } | null> {
+        return this.request('/user/challenges', 'GET');
+    },
+    getNotes() {
+        return this.request('/user/notes', 'GET');
+    },
+
+    // Приглашение
+    getInvite() {
+        return this.request('/invite', 'GET', undefined, false);
+    },
 };

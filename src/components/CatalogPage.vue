@@ -92,8 +92,8 @@
           :class="{ selected: currentTab === 'progress' }"
           @tap="goToTab('progress')"
         >
-          <Label text="📈" class="tab-icon" />
-          <Label text="Прогресс" class="tab-label" />
+          <Label text="📝" class="tab-icon" />
+          <Label text="Заметки" class="tab-label" />
         </StackLayout>
         <StackLayout
           col="3"
@@ -110,114 +110,112 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'nativescript-vue'
-import { $navigateTo } from 'nativescript-vue'
-import { Dialogs } from '@nativescript/core'
-import { hobbiesData } from '~/data/hobbies'
-import ChallengeDetail from './ChallengeDetail.vue'
-import ProfilePage from './ProfilePage.vue'
-import ProgressPage from './ProgressPage.vue'
-import MainPage from './MainPage.vue'
+import { ref, computed, onMounted } from 'nativescript-vue';
+import { $navigateTo } from 'nativescript-vue';
+import { Dialogs } from '@nativescript/core';
+import { api } from '~/services/api';
+import ChallengeDetail from './ChallengeDetail.vue';
+import ProfilePage from './ProfilePage.vue';
+import ProgressPage from './ProgressPage.vue';
+import MainPage from './MainPage.vue';
 
-const hobbies = ref(hobbiesData)
-const currentTab = ref('catalog')
+interface Hobby {
+    id: number;
+    title: string;
+    category: string;
+    difficulty: number;
+    image: string;
+}
 
-const searchQuery = ref('')
-const selectedCategory = ref<string | null>(null)
-const selectedDifficulty = ref<number | null>(null)
+const hobbies = ref<Hobby[]>([]);
+const currentTab = ref('catalog');
+
+const searchQuery = ref('');
+const selectedCategory = ref<string | null>(null);
+const selectedDifficulty = ref<number | null>(null);
 
 const categories = computed(() => {
-  const cats = new Set<string>()
-  hobbies.value.forEach(hobby => {
-    if (hobby.category) cats.add(hobby.category)
-  })
-  return Array.from(cats).sort()
-})
+    const cats = new Set<string>();
+    hobbies.value.forEach(h => { if (h.category) cats.add(h.category); });
+    return Array.from(cats).sort();
+});
 
-const categoryButtonText = computed(() => {
-  if (selectedCategory.value) return `📂 ${selectedCategory.value}`
-  return '📂 Категория'
-})
-
-const difficultyButtonText = computed(() => {
-  if (selectedDifficulty.value !== null) return `⭐ Сложность: ${selectedDifficulty.value}/5`
-  return '⭐ Сложность'
-})
+const categoryButtonText = computed(() =>
+    selectedCategory.value ? `📂 ${selectedCategory.value}` : '📂 Категория');
+const difficultyButtonText = computed(() =>
+    selectedDifficulty.value !== null ? `⭐ Сложность: ${selectedDifficulty.value}/5` : '⭐ Сложность');
 
 const filteredHobbies = computed(() => {
-  let result = hobbies.value
-
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.trim().toLowerCase()
-    result = result.filter(hobby =>
-      hobby.title.toLowerCase().includes(query)
-    )
-  }
-
-  if (selectedCategory.value) {
-    result = result.filter(hobby => hobby.category === selectedCategory.value)
-  }
-
-  if (selectedDifficulty.value !== null) {
-    result = result.filter(hobby => hobby.difficulty === selectedDifficulty.value)
-  }
-
-  return result
-})
+    let result = hobbies.value;
+    if (searchQuery.value.trim()) {
+        const q = searchQuery.value.trim().toLowerCase();
+        result = result.filter(h => h.title.toLowerCase().includes(q));
+    }
+    if (selectedCategory.value) {
+        result = result.filter(h => h.category === selectedCategory.value);
+    }
+    if (selectedDifficulty.value !== null) {
+        result = result.filter(h => h.difficulty === selectedDifficulty.value);
+    }
+    return result;
+});
 
 const rowsString = computed(() => {
-  const count = filteredHobbies.value.length
-  const rowsCount = Math.ceil(count / 2)
-  return Array(rowsCount).fill('auto').join(',')
-})
+    const rows = Math.ceil(filteredHobbies.value.length / 2);
+    return Array(rows).fill('auto').join(',');
+});
+
+async function loadChallenges() {
+    try {
+        const data = await api.getChallenges(); // массив ChallengeListResponse
+        hobbies.value = data.map((c: any) => ({
+            id: c.id,
+            title: c.title,
+            category: c.category,
+            difficulty: c.difficulty,
+            image: c.image,
+        }));
+    } catch (e) {
+        console.error('Ошибка загрузки каталога', e);
+    }
+}
+
+onMounted(loadChallenges);
 
 async function showCategoryFilter() {
-  const options = ['Все категории', ...categories.value]
-  const result = await Dialogs.action({
-    title: 'Выберите категорию',
-    cancelButtonText: 'Отмена',
-    actions: options
-  })
-  if (result === 'Все категории') {
-    selectedCategory.value = null
-  } else if (result !== 'Отмена') {
-    selectedCategory.value = result
-  }
+    const options = ['Все категории', ...categories.value];
+    const result = await Dialogs.action({
+        title: 'Выберите категорию',
+        cancelButtonText: 'Отмена',
+        actions: options,
+    });
+    if (result === 'Все категории') selectedCategory.value = null;
+    else if (result !== 'Отмена') selectedCategory.value = result;
 }
 
 async function showDifficultyFilter() {
-  const options = ['Любая сложность', '1', '2', '3', '4', '5']
-  const result = await Dialogs.action({
-    title: 'Выберите сложность',
-    cancelButtonText: 'Отмена',
-    actions: options
-  })
-  if (result === 'Любая сложность') {
-    selectedDifficulty.value = null
-  } else if (result !== 'Отмена') {
-    selectedDifficulty.value = parseInt(result, 10)
-  }
+    const options = ['Любая сложность', '1', '2', '3', '4', '5'];
+    const result = await Dialogs.action({
+        title: 'Выберите сложность',
+        cancelButtonText: 'Отмена',
+        actions: options,
+    });
+    if (result === 'Любая сложность') selectedDifficulty.value = null;
+    else if (result !== 'Отмена') selectedDifficulty.value = parseInt(result, 10);
 }
 
 function openChallenge(id: number) {
-  $navigateTo(ChallengeDetail, { props: { challengeId: id } })
+    $navigateTo(ChallengeDetail, { props: { challengeId: id } });
 }
 
 function goToTab(tab: string) {
-  currentTab.value = tab
-  switch (tab) {
-    case 'home':
-      $navigateTo(MainPage)
-      break
-    case 'catalog':
-      break
-    case 'progress':
-      $navigateTo(ProgressPage)
-      break
-    case 'profile':
-      $navigateTo(ProfilePage)
-      break
-  }
+    currentTab.value = tab;
+    switch (tab) {
+        case 'home': $navigateTo(MainPage); break;
+        case 'catalog': break;
+        case 'progress': $navigateTo(ProgressPage); break;
+        case 'profile': $navigateTo(ProfilePage); break;
+    }
 }
 </script>
 
