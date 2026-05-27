@@ -125,8 +125,8 @@ function goBack() {
 
 .notification-card {
   background-color: white;
-  border-radius: 16px;
-  margin-bottom: 12px;
+  border-radius: 30px;
+  margin: 12px;
   padding: 16px;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.06);
 }
@@ -142,6 +142,7 @@ function goBack() {
   align-items: center;
   justify-content: center;
   margin-right: 12px;
+
 }
 
 .notif-icon-purple {
@@ -202,9 +203,10 @@ function goBack() {
 }
 
 .empty-icon {
-  width: 600px;
-  height: 600px;
+  width: 400px;
+  height: 400px;
   margin-bottom: 14px;
+  border-radius: 450px;
 }
 
 .empty-text {

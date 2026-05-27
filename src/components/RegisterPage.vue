@@ -11,9 +11,9 @@
 
       <ScrollView row="1" class="form-scroll">
         <StackLayout class="form-container">
-          <TextField v-model="login" hint="Логин" class="input" />
+          <TextField v-model="login" hint="Почта" keyboardType="email" class="input" />
           <TextField v-model="password" hint="Пароль" secure="true" class="input" />
-          <TextField v-model="name" hint="Ваше имя" class="input" />
+          <TextField v-model="name" hint="Фамилия Имя Отчество" class="input" />
           <Button @tap="doRegister" text="Зарегистрироваться" class="button" />
         </StackLayout>
       </ScrollView>
@@ -31,11 +31,27 @@ const login = ref('');
 const password = ref('');
 const name = ref('');
 
+function isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
 async function doRegister() {
     if (!login.value || !password.value || !name.value) {
         await Dialogs.alert('Заполните все поля');
         return;
     }
+
+    if (!isValidEmail(login.value)) {
+        await Dialogs.alert('Введите корректный email-адрес');
+        return;
+    }
+
+    if (password.value.length < 6) {
+        await Dialogs.alert('Пароль должен содержать не менее 6 символов');
+        return;
+    }
+
     try {
         await api.signup(login.value, password.value, name.value);
         ApplicationSettings.setString('pending_user_name', name.value);

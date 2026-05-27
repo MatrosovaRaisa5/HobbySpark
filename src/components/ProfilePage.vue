@@ -1,9 +1,15 @@
 <template>
   <Page actionBarHidden="true" class="page">
-    <GridLayout rows="auto, *">
+    <GridLayout rows="auto, *, auto">
       <StackLayout row="0" class="header-section">
         <GridLayout columns="auto, *, auto" class="header-content">
-          <Image col="0" src="res://back" width="24" height="24" class="back-button" @tap="goBack" />
+          <Image
+            col="0"
+            src="res://icon"
+            width="60"
+            height="60"
+            class="app-icon"
+          />
           <Label col="1" text="Профиль" class="header-title" />
           <Image col="2" src="res://setting" width="27" height="27" class="settings-icon" @tap="goToSettings" />
         </GridLayout>
@@ -50,16 +56,60 @@
           </StackLayout>
         </StackLayout>
       </ScrollView>
+
+      <GridLayout row="2" columns="*, *, *, *" class="tabbar-menu">
+        <StackLayout
+          col="0"
+          class="tabbar-menu-item"
+          :class="{ selected: currentTab === 'home' }"
+          @tap="goToTab('home')"
+        >
+          <Label text="🏠" class="tab-icon" />
+          <Label text="Главная" class="tab-label" />
+        </StackLayout>
+        <StackLayout
+          col="1"
+          class="tabbar-menu-item"
+          :class="{ selected: currentTab === 'catalog' }"
+          @tap="goToTab('catalog')"
+        >
+          <Label text="📚" class="tab-icon" />
+          <Label text="Каталог" class="tab-label" />
+        </StackLayout>
+        <StackLayout
+          col="2"
+          class="tabbar-menu-item"
+          :class="{ selected: currentTab === 'progress' }"
+          @tap="goToTab('progress')"
+        >
+          <Label text="📝" class="tab-icon" />
+          <Label text="Заметки" class="tab-label" />
+        </StackLayout>
+        <StackLayout
+          col="3"
+          class="tabbar-menu-item"
+          :class="{ selected: currentTab === 'profile' }"
+          @tap="goToTab('profile')"
+        >
+          <Label text="👤" class="tab-icon" />
+          <Label text="Профиль" class="tab-label" />
+        </StackLayout>
+      </GridLayout>
     </GridLayout>
   </Page>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'nativescript-vue';
-import { $navigateTo, $navigateBack } from 'nativescript-vue';
+import { $navigateTo } from 'nativescript-vue';
 import { ApplicationSettings } from '@nativescript/core';
 import Settings from '~/components/Settings.vue';
 import AchievementsPage from './AchievementsPage.vue';
+import MainPage from './MainPage.vue';
+import CatalogPage from './CatalogPage.vue';
+import ProgressPage from './ProgressPage.vue';
+
+const currentTab = ref('profile');
 
 const profile = computed(() => ({
   name: ApplicationSettings.getString('user_name', 'Пользователь'),
@@ -92,7 +142,16 @@ function progressColumns(spark: { currentDay: number; totalDays: number }) {
 function toggleMySparks() { showAllMySparks.value = !showAllMySparks.value; }
 function goToSettings() { $navigateTo(Settings); }
 function goToAchievements() { $navigateTo(AchievementsPage); }
-function goBack() { $navigateBack(); }
+
+function goToTab(tab: string) {
+    currentTab.value = tab;
+    switch (tab) {
+        case 'home': $navigateTo(MainPage); break;
+        case 'catalog': $navigateTo(CatalogPage); break;
+        case 'progress': $navigateTo(ProgressPage); break;
+        case 'profile': break;
+    }
+}
 
 onMounted(async () => {
   try {
@@ -110,7 +169,7 @@ onMounted(async () => {
 .page { background-color: white; }
 .header-section { background-color: white; padding: 30px 20px 10px 20px; border-bottom-width: 1px; border-bottom-color: #f0f0f0; }
 .header-content { align-items: center; }
-.back-button { margin-right: 14px; }
+.app-icon { margin-right: 8px; }
 .header-title { font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 700; color: #181820; text-align: center; }
 .settings-icon { width: 60px; height: 60px; margin: 20px; }
 .content-scroll { background-color: white; }
@@ -135,4 +194,35 @@ onMounted(async () => {
 .progress-bg { background-color: #f3f3f6; height: 15px; border-radius: 10px; }
 .progress-fill { background-color: #8e5eed; height: 15px; border-radius: 10px; }
 .progress-text { font-family: 'Nunito Sans', sans-serif; font-size: 14px; color: #363645; margin-left: 30px; margin-right: 30px; }
+.tabbar-menu {
+  background-color: white;
+  border-top-width: 1px;
+  border-top-color: #E0E0E6;
+  height: 170px;
+  align-items: center;
+}
+.tabbar-menu-item {
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+  color: #565D6D;
+}
+.tabbar-menu-item.selected {
+  color: #8E5EED;
+  font-weight: 700;
+  background-color: #DBCCF9;
+}
+.tab-icon,
+.tab-label {
+  text-align: center;
+  horizontal-align: center;
+}
+.tab-icon {
+  font-size: 20px;
+}
+.tab-label {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 10px;
+  margin-top: 2px;
+}
 </style>

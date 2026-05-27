@@ -182,10 +182,9 @@ function goToTab(tab: string) {
 </script>
 
 <style scoped>
-/* все ваши стили без изменений */
 .page { background-color: #F8F6FF; }
 .header-section { background-color: white; padding: 30px 20px 10px 20px; }
-.header-content { align-items: center; margin-bottom: 10px; }
+.header-content { align-items: center; margin: 10px; }
 .app-icon { margin-right: 8px; }
 .header-title { font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 700; color: #181820; }
 .bell-wrap { width: 100px; height: 100px; border-radius: 12px; background-color: #F3F3F6; align-items: center; justify-content: center; }

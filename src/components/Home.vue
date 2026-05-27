@@ -1,17 +1,3 @@
-<script lang="ts" setup>
-import { $navigateTo } from 'nativescript-vue'
-import LoginPage from './LoginPage.vue'
-import RegisterPage from './RegisterPage.vue'
-
-function goToLogin() {
-  $navigateTo(LoginPage)
-}
-
-function goToRegister() {
-  $navigateTo(RegisterPage)
-}
-</script>
-
 <template>
   <Page actionBarHidden="true" class="page-gradient">
     <ScrollView>
@@ -29,21 +15,14 @@ function goToRegister() {
             text="Искры вдохновения каждый день"
             class="sub-title"
             textWrap="true"
+            :opacity="subtitleOpacity"
           />
         </StackLayout>
 
         <StackLayout row="3" class="px-10 mt-10">
           <Label
-            text="Увлекательные челленджи, которые поддержат твой путь!"
+            :text="typedDescription"
             class="description"
-            textWrap="true"
-          />
-        </StackLayout>
-
-        <StackLayout row="4" class="px-4 mt-">
-          <Label
-            text="Попробуй что-то новое без обязательств и стресса"
-            class="tagline"
             textWrap="true"
           />
         </StackLayout>
@@ -66,6 +45,61 @@ function goToRegister() {
   </Page>
 </template>
 
+<script lang="ts" setup>
+import { ref, onMounted } from 'nativescript-vue'
+import { $navigateTo } from 'nativescript-vue'
+import LoginPage from './LoginPage.vue'
+import RegisterPage from './RegisterPage.vue'
+
+const subtitleOpacity = ref(0)
+const typedDescription = ref('')
+const fullDescription = 'Увлекательные челленджи, которые поддержат твой путь!'
+
+onMounted(() => {
+  // Fade in subtitle after 800ms
+  setTimeout(() => {
+    animateFadeIn()
+  }, 800)
+
+  // Start typing effect after subtitle appears (2.5s total)
+  setTimeout(() => {
+    typeText()
+  }, 2500)
+})
+
+function animateFadeIn() {
+  let opacity = 0
+  const interval = setInterval(() => {
+    opacity += 0.05
+    subtitleOpacity.value = opacity
+    if (opacity >= 1) {
+      subtitleOpacity.value = 1
+      clearInterval(interval)
+    }
+  }, 50)
+}
+
+function typeText() {
+  let index = 0
+  const interval = setInterval(() => {
+    if (index < fullDescription.length) {
+      typedDescription.value += fullDescription[index]
+      index++
+    } else {
+      clearInterval(interval)
+    }
+  }, 45)
+}
+
+function goToLogin() {
+  $navigateTo(LoginPage)
+}
+
+function goToRegister() {
+  $navigateTo(RegisterPage)
+}
+</script>
+
 <style scoped>
 .page-gradient {
   background: linear-gradient(155.78deg, #8e5eedf0 0%, #fa9938f0 100%);
@@ -78,7 +112,7 @@ function goToRegister() {
 
 .main-title {
   font-family: 'Nunito', sans-serif;
-  font-size: 36px;
+  font-size: 40px;
   font-weight: 800;
   color: white;
   text-shadow: 0px 2px 4px rgba(24, 24, 32, 0.15);
@@ -88,23 +122,26 @@ function goToRegister() {
 
 .sub-title {
   font-family: 'Nunito', sans-serif;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
   color: white;
   text-shadow: 0px 0px 6px rgba(255, 255, 255, 0.5);
   text-align: center;
   margin-bottom: 100px;
+  margin-top: 50px;
 }
 
 .description {
   font-family: 'Nunito Sans', sans-serif;
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 700;
   color: #5618d4;
   text-align: center;
-  margin-bottom: 90px;
+  margin-top: 90px;
+  margin-bottom: 350px;
   padding-left: 40px;
   padding-right: 40px;
+  min-height: 60px;
 }
 
 .tagline {
@@ -123,9 +160,9 @@ function goToRegister() {
   font-size: 20px;
   font-weight: 400;
   border-radius: 70px;
-  height: 160px;
+  height: 180px;
   width: 80%;
-  margin-bottom: 70px;
+  margin-bottom: 50px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.156);
   padding: 0;
 }

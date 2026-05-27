@@ -11,7 +11,7 @@
 
       <ScrollView row="1" class="form-scroll">
         <StackLayout class="form-container">
-          <TextField v-model="login" hint="Логин" keyboardType="email" class="input" />
+          <TextField v-model="login" hint="Почта" keyboardType="email" class="input" />
           <TextField v-model="password" hint="Пароль" secure="true" class="input" />
           <Button @tap="doLogin" text="Войти" class="button" />
           <Label text="Нет аккаунта? Зарегистрируйтесь" class="info-text" textWrap="true" @tap="goToRegister" />
@@ -33,11 +33,27 @@ import InterestSelection from './InterestSelection.vue';
 const login = ref('');
 const password = ref('');
 
+function isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
 async function doLogin() {
     if (!login.value || !password.value) {
-        await Dialogs.alert('Введите логин и пароль');
+        await Dialogs.alert('Введите логин (email) и пароль');
         return;
     }
+
+    if (!isValidEmail(login.value)) {
+        await Dialogs.alert('Введите корректный email-адрес');
+        return;
+    }
+
+    if (password.value.length < 6) {
+        await Dialogs.alert('Пароль должен содержать не менее 6 символов');
+        return;
+    }
+
     try {
         const result = await api.login(login.value, password.value);
         ApplicationSettings.setString('access_token', result.token);
@@ -119,12 +135,13 @@ function goToRegister() { $navigateTo(RegisterPage); }
 
 .info-text {
   font-size: 15px;
-  color: #333333;
+  color: #646464;
   text-align: center;
   padding-left: 10px;
   padding-right: 10px;
   margin-bottom: 30px;
   font-family: 'Nunito Sans', sans-serif;
+  font-weight: bold;
 }
 
 .button {
