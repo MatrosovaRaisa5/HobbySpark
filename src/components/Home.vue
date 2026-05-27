@@ -1,47 +1,50 @@
 <template>
   <Page actionBarHidden="true" class="page-gradient">
-    <ScrollView>
-      <GridLayout rows="auto, auto, auto, auto, auto, auto" class="px-6">
-        <StackLayout row="0" class="items-center mt-[50px]">
-          <Image src="res://icon" width="72" height="72" class="image" />
-        </StackLayout>
+    <GridLayout rows="*, auto">
+      <ScrollView row="0">
+        <StackLayout class="content-wrapper">
+          <StackLayout class="items-center mt-[50px]">
+            <Image src="res://icon" width="72" height="72" class="image" />
+          </StackLayout>
 
-        <StackLayout row="1" class="items-center mt-3">
-          <Label text="HobbySpark" class="main-title" textWrap="true" />
-        </StackLayout>
+          <StackLayout class="items-center mt-3">
+            <Label text="HobbySpark" class="main-title" textWrap="true" />
+          </StackLayout>
 
-        <StackLayout row="2" class="items-center mt-6">
-          <Label
-            text="Искры вдохновения каждый день"
-            class="sub-title"
-            textWrap="true"
-            :opacity="subtitleOpacity"
-          />
-        </StackLayout>
+          <StackLayout class="items-center mt-6">
+            <Label
+              text="Искры вдохновения каждый день"
+              class="sub-title"
+              textWrap="true"
+              :opacity="subtitleOpacity"
+            />
+          </StackLayout>
 
-        <StackLayout row="3" class="px-10 mt-10">
-          <Label
-            :text="typedDescription"
-            class="description"
-            textWrap="true"
-          />
+          <StackLayout class="px-10 mt-10">
+            <Label
+              text="Увлекательные челленджи, которые поддержат твой путь!"
+              class="description"
+              textWrap="true"
+              :opacity="descriptionOpacity"
+            />
+          </StackLayout>
         </StackLayout>
+      </ScrollView>
 
-        <StackLayout row="5" class="mt-10 px-3">
-          <Button @tap="goToLogin" class="action-button">
-            <FormattedString>
-              <Span text="Войти" />
-            </FormattedString>
-          </Button>
+      <StackLayout row="1" class="buttons-container">
+        <Button @tap="goToLogin" class="action-button">
+          <FormattedString>
+            <Span text="Войти" />
+          </FormattedString>
+        </Button>
 
-          <Button @tap="goToRegister" class="action-button">
-            <FormattedString>
-              <Span text="Регистрация" />
-            </FormattedString>
-          </Button>
-        </StackLayout>
-      </GridLayout>
-    </ScrollView>
+        <Button @tap="goToRegister" class="action-button">
+          <FormattedString>
+            <Span text="Регистрация" />
+          </FormattedString>
+        </Button>
+      </StackLayout>
+    </GridLayout>
   </Page>
 </template>
 
@@ -52,43 +55,29 @@ import LoginPage from './LoginPage.vue'
 import RegisterPage from './RegisterPage.vue'
 
 const subtitleOpacity = ref(0)
-const typedDescription = ref('')
-const fullDescription = 'Увлекательные челленджи, которые поддержат твой путь!'
+const descriptionOpacity = ref(0)
 
 onMounted(() => {
-  // Fade in subtitle after 800ms
   setTimeout(() => {
-    animateFadeIn()
-  }, 800)
+    animateFadeIn(subtitleOpacity)
+  }, 1000)
 
-  // Start typing effect after subtitle appears (2.5s total)
+
   setTimeout(() => {
-    typeText()
-  }, 2500)
+    animateFadeIn(descriptionOpacity)
+  }, 1900)
 })
 
-function animateFadeIn() {
+function animateFadeIn(opacityRef: any) {
   let opacity = 0
   const interval = setInterval(() => {
     opacity += 0.05
-    subtitleOpacity.value = opacity
+    opacityRef.value = opacity
     if (opacity >= 1) {
-      subtitleOpacity.value = 1
+      opacityRef.value = 1
       clearInterval(interval)
     }
-  }, 50)
-}
-
-function typeText() {
-  let index = 0
-  const interval = setInterval(() => {
-    if (index < fullDescription.length) {
-      typedDescription.value += fullDescription[index]
-      index++
-    } else {
-      clearInterval(interval)
-    }
-  }, 45)
+  }, 60)
 }
 
 function goToLogin() {
@@ -105,9 +94,13 @@ function goToRegister() {
   background: linear-gradient(155.78deg, #8e5eedf0 0%, #fa9938f0 100%);
 }
 
+.content-wrapper {
+  padding-bottom: 20px;
+}
+
 .image {
   align-self: center;
-  margin-top: 50px;
+  margin-top: 80px;
 }
 
 .main-title {
@@ -135,22 +128,18 @@ function goToRegister() {
   font-family: 'Nunito Sans', sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: #5618d4;
+  color: #520fda;
   text-align: center;
-  margin-top: 90px;
-  margin-bottom: 350px;
+  margin-top: 110px;
+  margin-bottom: 20px;
   padding-left: 40px;
   padding-right: 40px;
   min-height: 60px;
 }
 
-.tagline {
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 19px;
-  color: white;
-  text-shadow: 1px 1px 3.6px rgba(23, 26, 31, 0.25);
-  text-align: center;
-  margin-bottom: 160px;
+.buttons-container {
+  padding: 0 20px 30px 20px;
+  margin-bottom: 120px;
 }
 
 .action-button {
@@ -165,6 +154,7 @@ function goToRegister() {
   margin-bottom: 50px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.156);
   padding: 0;
+  horizontal-align: center;
 }
 
 .action-button:active {

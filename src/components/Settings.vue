@@ -27,7 +27,7 @@
               <Image col="1" src="res://next" width="20" height="20" class="card-arrow" />
             </GridLayout>
 
-            
+
           </StackLayout>
 
           <StackLayout class="settings-block">
@@ -74,7 +74,7 @@ import { ref, onMounted } from 'nativescript-vue';
 import { $navigateBack, $navigateTo } from 'nativescript-vue';
 import { ApplicationSettings, Dialogs } from '@nativescript/core';
 import { api } from '~/services/api';
-import LoginPage from './LoginPage.vue';
+import WelcomePage from './Home.vue';
 import PersonalDataPage from './PersonalDataPage.vue';
 
 const notificationsEnabled = ref(true);
@@ -90,7 +90,7 @@ async function logout() {
     ApplicationSettings.remove('user_login');
     ApplicationSettings.remove('pending_user_name');
     ApplicationSettings.remove('interests_selected');
-    $navigateTo(LoginPage, { clearHistory: true });
+    $navigateTo(WelcomePage, { clearHistory: true });
 }
 
 async function deleteAccount() {
@@ -99,7 +99,7 @@ async function deleteAccount() {
         try {
             await api.deleteAccount();
             ApplicationSettings.clear();
-            $navigateTo(LoginPage, { clearHistory: true });
+            $navigateTo(WelcomePage, { clearHistory: true });
         } catch (err: any) {
             await Dialogs.alert('Ошибка удаления: ' + err.message);
         }
