@@ -2,7 +2,7 @@
 hooks/
 node_modules/
 platforms/
-
+App_Resources/Android/google-services.json
 # Logs
 logs
 *.log

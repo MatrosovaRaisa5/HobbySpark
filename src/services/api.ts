@@ -1,7 +1,7 @@
 import { Http } from '@nativescript/core';
 import { ApplicationSettings } from '@nativescript/core';
 
-const BASE_URL = 'http://192.168.1.207:8080/api';
+const BASE_URL = 'http://10.88.211.11:8080/api';
 
 export const api = {
     async request(endpoint: string, method: string, body?: any, needAuth = true, isMultipart = false) {
@@ -44,7 +44,9 @@ export const api = {
             throw new Error(errorMsg);
         }
     },
-
+    registerPushToken(token: string) {
+        return this.request('/notifications/register-token', 'POST', { token });
+    },
     // Аутентификация
     signup(login: string, password: string, name: string) {
         return this.request('/auth/signup', 'POST', { login, password, name }, false);

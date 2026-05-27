@@ -94,6 +94,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'nativescript-vue';
+
 import { $navigateTo } from 'nativescript-vue';
 import { ApplicationSettings } from '@nativescript/core';
 import { api } from '~/services/api';
@@ -103,6 +104,8 @@ import ChallengeDetail from './ChallengeDetail.vue';
 import ProfilePage from './ProfilePage.vue';
 import ProgressPage from './ProgressPage.vue';
 import DayTaskPage from './DayTaskPage.vue';
+import { initPushNotifications } from '~/services/notifications';
+import { LocalNotificationService } from '~/services/local-notifications';
 import {
   getCurrentDay,
   getTotalDays,
@@ -113,6 +116,8 @@ import {
 
 const currentTab = ref('home');
 const userName = ref(ApplicationSettings.getString('user_name', 'Пользователь'));
+initPushNotifications().catch(err => console.error(err));
+LocalNotificationService.scheduleDailyReminder();
 const activeChallenge = ref<any>(null);
 const recommendedHobbies = ref<any[]>([]);
 
@@ -131,8 +136,11 @@ const recsRows = computed(() => {
 });
 
 onMounted(async () => {
+  console.log('Вызов scheduleTestEveryMinute');
+  LocalNotificationService.scheduleTestEveryMinute();
   // попытка загрузить активный челлендж с сервера
   try {
+
     const challenge = await api.getActiveChallenge();
     if (challenge) {
       activeChallenge.value = challenge;
@@ -159,7 +167,9 @@ onMounted(async () => {
   } catch (e) {
     console.error('Ошибка загрузки рекомендаций', e);
   }
-});
+}
+
+);
 
 function goToNotifications() { $navigateTo(NotificationsPage); }
 
@@ -182,9 +192,10 @@ function goToTab(tab: string) {
 </script>
 
 <style scoped>
+/* все ваши стили без изменений */
 .page { background-color: #F8F6FF; }
 .header-section { background-color: white; padding: 30px 20px 10px 20px; }
-.header-content { align-items: center; margin: 10px; }
+.header-content { align-items: center; margin-bottom: 10px; }
 .app-icon { margin-right: 8px; }
 .header-title { font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 700; color: #181820; }
 .bell-wrap { width: 100px; height: 100px; border-radius: 12px; background-color: #F3F3F6; align-items: center; justify-content: center; }
